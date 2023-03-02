@@ -46,8 +46,6 @@ fn main() {
     let matches = sl().get_matches();
     let long_flag = matches.get_flag("long");
     if let Some(arg) = matches.get_one::<String>("path") {
-        println! {"ARG: {arg:?}"};
-
         let mut path = Path::new(&arg).to_path_buf();
 
         if arg.is_empty() {
@@ -152,12 +150,22 @@ fn read_dir(path: PathBuf, long_flag: bool) -> io::Result<()> {
         for entry in fs::read_dir(path)? {
             let entry = entry?;
 
+            let name = entry
+                .path()
+                .file_name()
+                .unwrap_or_else(|| {
+                    error!("Unable to get the filename");
+                    process::exit(1);
+                })
+                .to_string_lossy()
+                .to_string();
+
             if entry.path().is_file() {
-                println!("{}", entry.path().display().to_string().bright_green());
+                println!("{}", name.bright_green());
             } else if entry.path().is_dir() {
-                println!("{}", entry.path().display().to_string().blue());
+                println!("{}", name.blue());
             } else {
-                println!("{}", entry.path().display().to_string().dimmed());
+                println!("{}", name.dimmed());
             }
         }
     }
