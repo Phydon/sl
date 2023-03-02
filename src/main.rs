@@ -1,3 +1,12 @@
+// TODO don`t show hidden files by default
+// TODO add flags:
+// to output [type, size, last modified]
+// to customize colours
+// sort output differently
+// to show hidden
+// to show the path and not only the name
+// to show idx per entry
+
 use clap::{Arg, ArgAction, Command};
 use colored::*;
 use flexi_logger::{detailed_format, Duplicate, FileSpec, Logger};
@@ -88,9 +97,6 @@ fn main() {
     }
 }
 
-// TODO add flags:
-// sort
-// customize colours
 fn sl() -> Command {
     Command::new("sl")
         .bin_name("sl")
@@ -141,7 +147,6 @@ fn sl() -> Command {
         )
 }
 
-// TODO sort output
 fn read_dir(path: PathBuf, long_flag: bool) -> io::Result<()> {
     // TODO
     if long_flag {
@@ -161,11 +166,11 @@ fn read_dir(path: PathBuf, long_flag: bool) -> io::Result<()> {
                 .to_string();
 
             if entry.path().is_file() {
-                println!("{}", name.bright_green());
+                println!("{}", name);
             } else if entry.path().is_dir() {
-                println!("{}", name.blue());
+                println!("{}", name.bold());
             } else {
-                println!("{}", name.dimmed());
+                println!("{}", name.italic().dimmed());
             }
         }
     }
