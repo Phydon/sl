@@ -8,13 +8,14 @@
 
 * show files just white (or your default normal terminal colour)
 * show directories white bold
-* everything else is italci and greyish dimmed
+* everything else is italic and greyish dimmed
 * by default it only lists names 
-* accepts a path as an argument via the ```-p```/```--path``` flag
+* accepts a path as an argument via the ```-p``` / ```--path``` flag
 
 ## Usage
 => not fully completed yet
 
+```
 sl [OPTIONS] [COMMAND]
 
 Commands:
@@ -26,6 +27,7 @@ Options:
   -l, --long         Show more
   -h, --help         Print help (see more with '--help')
   -V, --version      Print version
+```
 
 ## TODO
 
