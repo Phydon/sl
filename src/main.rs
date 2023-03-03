@@ -1,6 +1,8 @@
 // TODO add flags:
 // sort output differently
 // show stats
+// show line numbers/idx
+// show only files, only dirs
 
 use clap::{Arg, ArgAction, Command};
 use colored::*;
@@ -98,6 +100,8 @@ fn main() {
     let hidden_flag = matches.get_flag("hidden");
     let colour_flag = matches.get_flag("colour");
     let fullpath_flag = matches.get_flag("fullpath");
+    let files_flag = matches.get_flag("files");
+    let dirs_flag = matches.get_flag("dirs");
     if let Some(arg) = matches.get_one::<String>("path") {
         let mut path = Path::new(&arg).to_path_buf();
 
@@ -109,7 +113,15 @@ fn main() {
             path.push(current_dir);
         }
 
-        if let Err(err) = read_dir(path, long_flag, hidden_flag, fullpath_flag, colour_flag) {
+        if let Err(err) = list_dirs(
+            path,
+            long_flag,
+            hidden_flag,
+            fullpath_flag,
+            colour_flag,
+            files_flag,
+            dirs_flag,
+        ) {
             error!("Error while trying to change the filenames: {}", err);
             process::exit(1);
         }
@@ -132,8 +144,15 @@ fn main() {
 
                 let path = Path::new(&current_dir).to_path_buf();
 
-                if let Err(err) = read_dir(path, long_flag, hidden_flag, fullpath_flag, colour_flag)
-                {
+                if let Err(err) = list_dirs(
+                    path,
+                    long_flag,
+                    hidden_flag,
+                    fullpath_flag,
+                    colour_flag,
+                    files_flag,
+                    dirs_flag,
+                ) {
                     error!("Error while trying to change the filenames: {}", err);
                     process::exit(1);
                 }
@@ -176,8 +195,22 @@ fn sl() -> Command {
                 .action(ArgAction::SetTrue),
         )
         .arg(
-            Arg::new("fullpath")
+            Arg::new("dirs")
+                .short('d')
+                .long("dirs")
+                .help("Show only dirs")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("files")
                 .short('f')
+                .long("files")
+                .help("Show only files")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("fullpath")
+                .short('F')
                 .long("fullpath")
                 .help("Show the complete path instead of just the name")
                 .action(ArgAction::SetTrue),
@@ -213,106 +246,74 @@ fn sl() -> Command {
         )
 }
 
-fn read_dir(
+// TODO handle unwraps
+fn list_dirs(
     path: PathBuf,
     long_flag: bool,
     hidden_flag: bool,
     fullpath_flag: bool,
     colour_flag: bool,
+    files_flag: bool,
+    dirs_flag: bool,
 ) -> io::Result<()> {
-    // TODO long_flag only for debugging
-    if long_flag {
-        let dir_entries = store_dir_entries(&path).unwrap();
-        for entry in dir_entries {
-            println!("{} {} {}", entry.idx, entry.read_only, entry.modified);
-        }
-    } else if hidden_flag {
-        if fullpath_flag {
-            if colour_flag {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    print_output_short(entry.path, true, entry.filetype.as_str());
-                }
-            } else {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    print_output_short(entry.path, false, entry.filetype.as_str());
-                }
-            }
-        } else {
-            if colour_flag {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    print_output_short(entry.name, true, entry.filetype.as_str());
-                }
-            } else {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    print_output_short(entry.name, false, entry.filetype.as_str());
-                }
+    let dir_entries = store_dir_entries(&path).unwrap();
+
+    match long_flag {
+        true => {
+            // TODO only for debugging
+            for entry in dir_entries {
+                println!(
+                    "{} {} {} {}",
+                    entry.idx, entry.name, entry.read_only, entry.modified
+                );
             }
         }
-    } else {
-        if fullpath_flag {
-            if colour_flag {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    if entry.hidden {
-                        continue;
-                    }
-                    print_output_short(entry.path, true, entry.filetype.as_str());
+        false => {
+            for entry in dir_entries {
+                if entry.hidden && !hidden_flag {
+                    continue;
                 }
-            } else {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    if entry.hidden {
-                        continue;
-                    }
-                    print_output_short(entry.path, false, entry.filetype.as_str());
+
+                if files_flag && !entry.filetype.as_str().contains("file") {
+                    continue;
                 }
-            }
-        } else {
-            if colour_flag {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    if entry.hidden {
-                        continue;
-                    }
-                    print_output_short(entry.name, true, entry.filetype.as_str());
+
+                if dirs_flag && !entry.filetype.as_str().contains("dir") {
+                    continue;
                 }
-            } else {
-                let dir_entries = store_dir_entries(&path).unwrap();
-                for entry in dir_entries {
-                    if entry.hidden {
-                        continue;
-                    }
-                    print_output_short(entry.name, false, entry.filetype.as_str());
-                }
+
+                let name_or_path = if fullpath_flag {
+                    entry.path
+                } else {
+                    entry.name
+                };
+
+                print_output_short(name_or_path, entry.filetype.as_str(), colour_flag);
             }
         }
-
-        // for entry in fs::read_dir(path)? {
-        //     let entry = entry?;
-
-        //     let name = entry
-        //         .path()
-        //         .file_name()
-        //         .unwrap_or_else(|| {
-        //             error!("Unable to get the filename");
-        //             process::exit(1);
-        //         })
-        //         .to_string_lossy()
-        //         .to_string();
-
-        //     if entry.path().is_file() {
-        //         println!("{}", name);
-        //     } else if entry.path().is_dir() {
-        //         println!("{}", name.bold());
-        //     } else {
-        //         println!("{}", name.italic().dimmed());
-        //     }
-        // }
     }
+
+    // for entry in fs::read_dir(path)? {
+    //     let entry = entry?;
+
+    //     let name = entry
+    //         .path()
+    //         .file_name()
+    //         .unwrap_or_else(|| {
+    //             error!("Unable to get the filename");
+    //             process::exit(1);
+    //         })
+    //         .to_string_lossy()
+    //         .to_string();
+
+    //     if entry.path().is_file() {
+    //         println!("{}", name);
+    //     } else if entry.path().is_dir() {
+    //         println!("{}", name.bold());
+    //     } else {
+    //         println!("{}", name.italic().dimmed());
+    //     }
+    // }
 
     Ok(())
 }
@@ -356,7 +357,7 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
     Ok(storage)
 }
 
-fn print_output_short(name_or_path: String, colour: bool, filetype: &str) {
+fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
     if colour {
         match filetype {
             "file" => {
