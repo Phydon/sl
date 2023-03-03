@@ -1,11 +1,5 @@
-// TODO don`t show hidden files by default
 // TODO add flags:
-// to output [type, size, last modified]
-// to customize colours
 // sort output differently
-// to show hidden
-// to show the path and not only the name
-// to show idx per entry
 // show stats
 
 use clap::{Arg, ArgAction, Command};
@@ -226,9 +220,12 @@ fn read_dir(
     fullpath_flag: bool,
     colour_flag: bool,
 ) -> io::Result<()> {
-    // TODO
+    // TODO long_flag only for debugging
     if long_flag {
-        unimplemented!();
+        let dir_entries = store_dir_entries(&path).unwrap();
+        for entry in dir_entries {
+            println!("{} {} {}", entry.idx, entry.read_only, entry.modified);
+        }
     } else if hidden_flag {
         if fullpath_flag {
             if colour_flag {
@@ -321,7 +318,7 @@ fn read_dir(
 }
 
 // TODO replace unwraps
-fn store_dir_entries(entry_path: &PathBuf) -> io::Result<(Vec<FileData>)> {
+fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
     let mut storage: Vec<FileData> = Vec::new();
     let mut idx = 0;
     for entry in fs::read_dir(entry_path)? {
@@ -353,10 +350,6 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<(Vec<FileData>)> {
         let filedata = FileData::new(idx, name, path, filetype, hidden, read_only, modified);
         storage.push(filedata);
 
-        // println!(
-        //     "{}: {}, {}, hidden: {}, read_only: {}, modified: {} hours ago",
-        //     idx, name, path, hidden, read_only, ago
-        // );
         idx += 1;
     }
 
