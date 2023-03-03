@@ -2,7 +2,6 @@
 // sort output differently
 // show stats
 // show line numbers/idx
-// show only files, only dirs
 
 use clap::{Arg, ArgAction, Command};
 use colored::*;
@@ -21,23 +20,19 @@ use std::{
 
 #[derive(Debug)]
 struct FileData {
-    idx: u32,
     name: String,
     path: String,
     filetype: String,
     hidden: bool,
-    read_only: bool,
     modified: u64,
 }
 
 impl FileData {
     fn new(
-        idx: u32,
         name: String,
         path: String,
         filetype: FileType,
         hidden: bool,
-        read_only: bool,
         modified: u64,
     ) -> FileData {
         let mut ftype = String::new();
@@ -50,12 +45,10 @@ impl FileData {
         }
 
         FileData {
-            idx: idx,
             name: name,
             path: path,
             filetype: ftype,
             hidden: hidden,
-            read_only: read_only,
             modified: modified,
         }
     }
@@ -122,7 +115,7 @@ fn main() {
             files_flag,
             dirs_flag,
         ) {
-            error!("Error while trying to change the filenames: {}", err);
+            error!("Unable to get the entries of the directory: {}", err);
             process::exit(1);
         }
     } else {
@@ -153,7 +146,7 @@ fn main() {
                     files_flag,
                     dirs_flag,
                 ) {
-                    error!("Error while trying to change the filenames: {}", err);
+                    error!("Unable to get the entries of the directory: {}", err);
                     process::exit(1);
                 }
             }
@@ -246,7 +239,6 @@ fn sl() -> Command {
         )
 }
 
-// TODO handle unwraps
 fn list_dirs(
     path: PathBuf,
     long_flag: bool,
@@ -260,11 +252,30 @@ fn list_dirs(
 
     match long_flag {
         true => {
-            // TODO only for debugging
             for entry in dir_entries {
-                println!(
-                    "{} {} {} {}",
-                    entry.idx, entry.name, entry.read_only, entry.modified
+                if entry.hidden && !hidden_flag {
+                    continue;
+                }
+
+                if files_flag && !entry.filetype.as_str().contains("file") {
+                    continue;
+                }
+
+                if dirs_flag && !entry.filetype.as_str().contains("dir") {
+                    continue;
+                }
+
+                let name_or_path = if fullpath_flag {
+                    entry.path
+                } else {
+                    entry.name
+                };
+
+                print_output_long(
+                    name_or_path,
+                    entry.filetype.as_str(),
+                    colour_flag,
+                    entry.modified,
                 );
             }
         }
@@ -293,35 +304,11 @@ fn list_dirs(
         }
     }
 
-    // for entry in fs::read_dir(path)? {
-    //     let entry = entry?;
-
-    //     let name = entry
-    //         .path()
-    //         .file_name()
-    //         .unwrap_or_else(|| {
-    //             error!("Unable to get the filename");
-    //             process::exit(1);
-    //         })
-    //         .to_string_lossy()
-    //         .to_string();
-
-    //     if entry.path().is_file() {
-    //         println!("{}", name);
-    //     } else if entry.path().is_dir() {
-    //         println!("{}", name.bold());
-    //     } else {
-    //         println!("{}", name.italic().dimmed());
-    //     }
-    // }
-
     Ok(())
 }
 
-// TODO replace unwraps
 fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
     let mut storage: Vec<FileData> = Vec::new();
-    let mut idx = 0;
     for entry in fs::read_dir(entry_path)? {
         let entry = entry?;
 
@@ -330,28 +317,31 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
             .path()
             .file_name()
             .unwrap_or_else(|| {
-                error!("Unable to get the filename");
+                error!("Unable to get the filename of {path}");
                 process::exit(1);
             })
             .to_string_lossy()
             .to_string();
-        let hidden = is_hidden(&entry.path()).unwrap();
+        let hidden = is_hidden(&entry.path()).unwrap_or_else(|err| {
+            error!("Unable to tell if file {path} is hidden: {err}");
+            process::exit(1);
+        });
 
         let metadata = fs::metadata(entry.path())?;
         let filetype = metadata.file_type();
-        let read_only = metadata.permissions().readonly();
-        let modified_systime = metadata.modified().unwrap();
+        let modified_systime = metadata.modified()?;
         let diff = SystemTime::now()
             .duration_since(modified_systime)
-            .unwrap()
+            .unwrap_or_else(|err| {
+                error!("Unable to get duration since the system is running: {err}");
+                process::exit(1);
+            })
             .as_secs();
         // TODO round
         let modified = diff / 3600;
 
-        let filedata = FileData::new(idx, name, path, filetype, hidden, read_only, modified);
+        let filedata = FileData::new(name, path, filetype, hidden, modified);
         storage.push(filedata);
-
-        idx += 1;
     }
 
     Ok(storage)
@@ -380,6 +370,54 @@ fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
             }
             _ => {
                 println!("{}", name_or_path.italic().dimmed())
+            }
+        }
+    }
+}
+
+fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modified: u64) {
+    if colour {
+        match filetype {
+            "file" => {
+                println!(
+                    "{} hours ago\t{}\t{}",
+                    modified,
+                    "file",
+                    name_or_path.bright_green()
+                )
+            }
+            "dir" => {
+                println!(
+                    "{} hours ago\t{}\t{}",
+                    modified,
+                    "dir",
+                    name_or_path.bold().blue(),
+                )
+            }
+            _ => {
+                println!(
+                    "{} hours ago\t{}\t{}",
+                    modified,
+                    "symlink",
+                    name_or_path.italic().dimmed(),
+                )
+            }
+        }
+    } else {
+        match filetype {
+            "file" => {
+                println!("{} hours ago\t{}\t{}", modified, "file", name_or_path)
+            }
+            "dir" => {
+                println!("{} hours ago\t{}\t{}", modified, "dir", name_or_path.bold(),)
+            }
+            _ => {
+                println!(
+                    "{} hours ago\t{}\t{}",
+                    modified,
+                    "symlink",
+                    name_or_path.italic().dimmed(),
+                )
             }
         }
     }
