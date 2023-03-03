@@ -8,15 +8,30 @@
 
 > no fancy stuff => just another (bad) ```ls``` clone
 
+## Examples
+
+![sl](https://github.com/Phydon/sl/assets/sl)
+
+![sl_c](https://github.com/Phydon/sl/assets/sl_c)
+
+![sl_l](https://github.com/Phydon/sl/assets/sl_l)
+
+![sl_cHlF](https://github.com/Phydon/sl/assets/sl_cHlF)
+
+![sl_Hd_p](https://github.com/Phydon/sl/assets/sl_Hd_p)
+
+![sl_Hf_p](https://github.com/Phydon/sl/assets/sl_Hf_p)
+
+![sl_cHlFf_p](https://github.com/Phydon/sl/assets/sl_cHlFf_p)
+
+
+
 ## Why?
 
 * I am forced to work on windows
 * -> only default shells (powershell/cmd) allowed
 * -> no external programs allowed
 * My solution => I write my own stuff as needed
-
-* learning
-* fun
 
 *I don\`t recommend using this program.
 If you can, use something like ```exa```*
@@ -44,7 +59,7 @@ Options:
 ```
 
 ## Installation
-via Cargo or get the binary ![releases](https://github.com/Phydon/sl/releases)
+via Cargo or get the ![binary](https://github.com/Phydon/sl/releases)
 
 
 ## TODO
