@@ -6,16 +6,17 @@
 
 > simply list everything in a directory
 
-> no fancy stuff => for more use ```ls```
+> no fancy stuff => just another bad ```ls``` clone
 
-* show files just white (or your default normal terminal colour)
-* show directories white bold
-* everything else is italic and greyish dimmed
-* by default it only lists names 
-* accepts a path as an argument via the ```-p``` / ```--path``` flag
+## Why?
+
+* forced to work on windows
+* only default shells (powershell/cmd) allowed
+* no external programs allowed
+* => write your own stuff as needed
+
 
 ## Usage
-=> not fully completed yet
 
 ```
 sl [OPTIONS] [COMMAND]
@@ -26,7 +27,9 @@ Commands:
 
 Options:
   -c, --colour       Show coloured output
-  -f, --fullpath     Show the complete path instead of just the name
+  -d, --dirs         Show only dirs
+  -f, --files        Show only files
+  -F, --fullpath     Show the complete path instead of just the name
   -H, --hidden       Show hidden files
   -l, --long         Show more output
   -p, --path <PATH>  Add a path to a directory
@@ -34,11 +37,12 @@ Options:
   -V, --version      Print version
 ```
 
+## Installation
+via Cargo or get the binary
+
 ## TODO
 
-- don`t show hidden files by default
-- use flags:
-    - to output [type, size, read_only last modified]
-    - to customize colours
+- more flags:
+    - to output [size]
     - to sort output differently
-    - to show idx per entry
+    - show stats
