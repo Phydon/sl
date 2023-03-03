@@ -179,7 +179,7 @@ fn sl() -> Command {
             Arg::new("fullpath")
                 .short('f')
                 .long("fullpath")
-                .help("Show the complete pathes instead of just the names")
+                .help("Show the complete path instead of just the name")
                 .action(ArgAction::SetTrue),
         )
         .arg(
@@ -194,7 +194,7 @@ fn sl() -> Command {
                 .short('l')
                 .long("long")
                 .help("Show more output")
-                .long_help("Additionaly display [type, size, last modified]")
+                .long_help("Additionaly display [type, size, last modified, read_only]")
                 .action(ArgAction::SetTrue),
         )
         .arg(
