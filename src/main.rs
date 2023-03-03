@@ -183,6 +183,7 @@ fn sl() -> Command {
             Arg::new("colour")
                 .short('c')
                 .long("colour")
+                .visible_alias("color")
                 .help("Show coloured output")
                 .action(ArgAction::SetTrue),
         )
@@ -190,6 +191,7 @@ fn sl() -> Command {
             Arg::new("dirs")
                 .short('d')
                 .long("dirs")
+                .visible_alias("dir")
                 .help("Show only dirs")
                 .action(ArgAction::SetTrue),
         )
@@ -197,6 +199,7 @@ fn sl() -> Command {
             Arg::new("files")
                 .short('f')
                 .long("files")
+                .visible_alias("file")
                 .help("Show only files")
                 .action(ArgAction::SetTrue),
         )
@@ -211,6 +214,7 @@ fn sl() -> Command {
             Arg::new("hidden")
                 .short('H')
                 .long("hidden")
+                .visible_alias("all")
                 .help("Show hidden files")
                 .action(ArgAction::SetTrue),
         )
@@ -349,10 +353,10 @@ fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
     if colour {
         match filetype {
             "file" => {
-                println!("{}", name_or_path.bright_green())
+                println!("{}", name_or_path.truecolor(250, 0, 104))
             }
             "dir" => {
-                println!("{}", name_or_path.bold().blue())
+                println!("{}", name_or_path.bold().truecolor(127, 111, 219))
             }
             _ => {
                 println!("{}", name_or_path.italic().dimmed())
@@ -381,7 +385,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
                     "{} hrs ago\t{}\t{}",
                     modified,
                     "file",
-                    name_or_path.bright_green()
+                    name_or_path.truecolor(250, 0, 104)
                 )
             }
             "dir" => {
@@ -389,7 +393,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
                     "{} hrs ago\t{}\t{}",
                     modified,
                     "dir",
-                    name_or_path.bold().blue(),
+                    name_or_path.bold().truecolor(127, 111, 219),
                 )
             }
             _ => {
