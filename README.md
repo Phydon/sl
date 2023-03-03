@@ -6,14 +6,20 @@
 
 > simply list everything in a directory
 
-> no fancy stuff => just another bad ```ls``` clone
+> no fancy stuff => just another (bad) ```ls``` clone
 
 ## Why?
 
-* forced to work on windows
-* only default shells (powershell/cmd) allowed
-* no external programs allowed
-* => write your own stuff as needed
+* I am forced to work on windows
+* -> only default shells (powershell/cmd) allowed
+* -> no external programs allowed
+* My solution => I write my own stuff as needed
+
+* learning
+* fun
+
+*I don\`t recommend using this program.
+If you can, use something like ```exa```*
 
 
 ## Usage
@@ -38,7 +44,8 @@ Options:
 ```
 
 ## Installation
-via Cargo or get the binary
+via Cargo or get the binary ![releases](https://github.com/Phydon/sl/releases)
+
 
 ## TODO
 
