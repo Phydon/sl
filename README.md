@@ -5,6 +5,7 @@
 *simplified ls command*
 
 > simply list everything in a directory
+
 > no fancy stuff => for more use ```ls```
 
 * show files just white (or your default normal terminal colour)
@@ -24,8 +25,11 @@ Commands:
   help     Print this message or the help of the given subcommand(s)
 
 Options:
+  -c, --colour       Show coloured output
+  -f, --fullpath     Show the complete path instead of just the name
+  -H, --hidden       Show hidden files
+  -l, --long         Show more output
   -p, --path <PATH>  Add a path to a directory
-  -l, --long         Show more
   -h, --help         Print help (see more with '--help')
   -V, --version      Print version
 ```
@@ -34,9 +38,7 @@ Options:
 
 - don`t show hidden files by default
 - use flags:
-    - to output [type, size, last modified]
+    - to output [type, size, read_only last modified]
     - to customize colours
-    - sort output differently
-    - to show hidden
-    - to show the path and not only the name
+    - to sort output differently
     - to show idx per entry
