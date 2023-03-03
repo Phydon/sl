@@ -1,9 +1,10 @@
 # sl
 
-**simplified ls command**
+**SIMPLE LS**
+
+*simplified ls command*
 
 > simply list everything in a directory
-
 > no fancy stuff => for more use ```ls```
 
 * show files just white (or your default normal terminal colour)

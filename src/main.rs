@@ -6,6 +6,7 @@
 // to show hidden
 // to show the path and not only the name
 // to show idx per entry
+// show stats
 
 use clap::{Arg, ArgAction, Command};
 use colored::*;
@@ -14,9 +15,41 @@ use log::error;
 
 use std::{
     env, fs, io,
+    os::windows::prelude::MetadataExt,
     path::{Path, PathBuf},
     process,
+    time::SystemTime,
 };
+
+#[derive(Debug)]
+struct FileData {
+    idx: u32,
+    name: String,
+    path: String,
+    hidden: bool,
+    read_only: bool,
+    modified: u64,
+}
+
+impl FileData {
+    fn new(
+        idx: u32,
+        name: String,
+        path: String,
+        hidden: bool,
+        read_only: bool,
+        modified: u64,
+    ) -> FileData {
+        FileData {
+            idx: idx,
+            name: name,
+            path: path,
+            hidden: hidden,
+            read_only: read_only,
+            modified: modified,
+        }
+    }
+}
 
 fn main() {
     // handle Ctrl+C
@@ -54,6 +87,9 @@ fn main() {
     // handle arguments
     let matches = sl().get_matches();
     let long_flag = matches.get_flag("long");
+    let hidden_flag = matches.get_flag("hidden");
+    // let colour_flag = matches.get_flag("colour");
+    // let fullpath_flag = matches.get_flag("fullpath");
     if let Some(arg) = matches.get_one::<String>("path") {
         let mut path = Path::new(&arg).to_path_buf();
 
@@ -65,7 +101,7 @@ fn main() {
             path.push(current_dir);
         }
 
-        if let Err(err) = read_dir(path, long_flag) {
+        if let Err(err) = read_dir(path, long_flag, hidden_flag) {
             error!("Error while trying to change the filenames: {}", err);
             process::exit(1);
         }
@@ -88,7 +124,7 @@ fn main() {
 
                 let path = Path::new(&current_dir).to_path_buf();
 
-                if let Err(err) = read_dir(path, long_flag) {
+                if let Err(err) = read_dir(path, long_flag, hidden_flag) {
                     error!("Error while trying to change the filenames: {}", err);
                     process::exit(1);
                 }
@@ -124,6 +160,35 @@ fn sl() -> Command {
         .version("1.0.0")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
+            Arg::new("colour")
+                .short('c')
+                .long("colour")
+                .help("Show coloured output")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("fullpath")
+                .short('f')
+                .long("fullpath")
+                .help("Show the complete pathes instead of just the names")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("hidden")
+                .short('H')
+                .long("hidden")
+                .help("Show hidden files")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("long")
+                .short('l')
+                .long("long")
+                .help("Show more output")
+                .long_help("Additionaly display [type, size, last modified]")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
             Arg::new("path")
                 .short('p')
                 .long("path")
@@ -132,14 +197,6 @@ fn sl() -> Command {
                 .num_args(1)
                 .value_name("PATH"),
         )
-        .arg(
-            Arg::new("long")
-                .short('l')
-                .long("long")
-                .help("Show more")
-                .long_help("Just show more output")
-                .action(ArgAction::SetTrue),
-        )
         .subcommand(
             Command::new("log")
                 .short_flag('L')
@@ -147,10 +204,17 @@ fn sl() -> Command {
         )
 }
 
-fn read_dir(path: PathBuf, long_flag: bool) -> io::Result<()> {
+fn read_dir(path: PathBuf, long_flag: bool, hidden_flag: bool) -> io::Result<()> {
     // TODO
     if long_flag {
         unimplemented!();
+    } else if hidden_flag {
+        // TODO change this
+        // currently only for debuging
+        let dir_entries = store_dir_entries(path).unwrap();
+        for entry in dir_entries {
+            println!("{:?}", entry);
+        }
     } else {
         for entry in fs::read_dir(path)? {
             let entry = entry?;
@@ -176,6 +240,59 @@ fn read_dir(path: PathBuf, long_flag: bool) -> io::Result<()> {
     }
 
     Ok(())
+}
+
+// TODO replace unwraps
+fn store_dir_entries(entry_path: PathBuf) -> io::Result<(Vec<FileData>)> {
+    let mut storage: Vec<FileData> = Vec::new();
+    let mut idx = 0;
+    for entry in fs::read_dir(entry_path)? {
+        let entry = entry?;
+
+        let path = entry.path().as_path().to_string_lossy().to_string();
+        let name = entry
+            .path()
+            .file_name()
+            .unwrap_or_else(|| {
+                error!("Unable to get the filename");
+                process::exit(1);
+            })
+            .to_string_lossy()
+            .to_string();
+        let hidden = is_hidden(&entry.path()).unwrap();
+
+        let metadata = fs::metadata(entry.path())?;
+        let read_only = metadata.permissions().readonly();
+        let modified_systime = metadata.modified().unwrap();
+        let diff = SystemTime::now()
+            .duration_since(modified_systime)
+            .unwrap()
+            .as_secs();
+        // TODO round
+        let modified = diff / 3600;
+
+        let filedata = FileData::new(idx, name, path, hidden, read_only, modified);
+        storage.push(filedata);
+
+        // println!(
+        //     "{}: {}, {}, hidden: {}, read_only: {}, modified: {} hours ago",
+        //     idx, name, path, hidden, read_only, ago
+        // );
+        idx += 1;
+    }
+
+    Ok(storage)
+}
+
+fn is_hidden(file_path: &PathBuf) -> std::io::Result<bool> {
+    let metadata = fs::metadata(file_path)?;
+    let attributes = metadata.file_attributes();
+
+    if (attributes & 0x2) > 0 {
+        Ok(true)
+    } else {
+        Ok(false)
+    }
 }
 
 fn check_create_config_dir() -> io::Result<PathBuf> {
