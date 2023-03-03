@@ -1,7 +1,7 @@
 // TODO add flags:
 // sort output differently
 // show stats
-// show line numbers/idx
+// get size
 
 use clap::{Arg, ArgAction, Command};
 use colored::*;
@@ -18,7 +18,6 @@ use std::{
     time::SystemTime,
 };
 
-#[derive(Debug)]
 struct FileData {
     name: String,
     path: String,
@@ -337,7 +336,6 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
                 process::exit(1);
             })
             .as_secs();
-        // TODO round
         let modified = diff / 3600;
 
         let filedata = FileData::new(name, path, filetype, hidden, modified);
@@ -380,7 +378,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
         match filetype {
             "file" => {
                 println!(
-                    "{} hours ago\t{}\t{}",
+                    "{} hrs ago\t{}\t{}",
                     modified,
                     "file",
                     name_or_path.bright_green()
@@ -388,7 +386,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
             }
             "dir" => {
                 println!(
-                    "{} hours ago\t{}\t{}",
+                    "{} hrs ago\t{}\t{}",
                     modified,
                     "dir",
                     name_or_path.bold().blue(),
@@ -396,7 +394,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
             }
             _ => {
                 println!(
-                    "{} hours ago\t{}\t{}",
+                    "{} hrs ago\t{}\t{}",
                     modified,
                     "symlink",
                     name_or_path.italic().dimmed(),
@@ -406,14 +404,14 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
     } else {
         match filetype {
             "file" => {
-                println!("{} hours ago\t{}\t{}", modified, "file", name_or_path)
+                println!("{} hrs ago\t{}\t{}", modified, "file", name_or_path)
             }
             "dir" => {
-                println!("{} hours ago\t{}\t{}", modified, "dir", name_or_path.bold(),)
+                println!("{} hrs ago\t{}\t{}", modified, "dir", name_or_path.bold(),)
             }
             _ => {
                 println!(
-                    "{} hours ago\t{}\t{}",
+                    "{} hrs ago\t{}\t{}",
                     modified,
                     "symlink",
                     name_or_path.italic().dimmed(),
