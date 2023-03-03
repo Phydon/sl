@@ -10,19 +10,19 @@
 
 ## Examples
 
-![sl](https://github.com/Phydon/sl/assets/sl.png)
+![sl](https://github.com/Phydon/sl/blob/master/assets/sl.png)
 
-![sl_c](https://github.com/Phydon/sl/assets/sl_c.png)
+![sl_c](https://github.com/Phydon/sl/blob/master/assets/sl_c.png)
 
-![sl_l](https://github.com/Phydon/sl/assets/sl_l.png)
+![sl_l](https://github.com/Phydon/sl/blob/master/assets/sl_l.png)
 
-![sl_cHlF](https://github.com/Phydon/sl/assets/sl_cHlF.png)
+![sl_cHlF](https://github.com/Phydon/sl/blob/master/assets/sl_cHlF.png)
 
-![sl_Hd_p](https://github.com/Phydon/sl/assets/sl_Hd_p.png)
+![sl_Hd_p](https://github.com/Phydon/sl/blob/master/assets/sl_Hd_p.png)
 
-![sl_Hf_p](https://github.com/Phydon/sl/assets/sl_Hf_p.png)
+![sl_Hf_p](https://github.com/Phydon/sl/blob/master/assets/sl_Hf_p.png)
 
-![sl_cHlFf_p](https://github.com/Phydon/sl/assets/sl_cHlFf_p.png)
+![sl_cHlFf_p](https://github.com/Phydon/sl/blob/master/assets/sl_cHlFf_p.png)
 
 
 
