@@ -14,7 +14,9 @@ use flexi_logger::{detailed_format, Duplicate, FileSpec, Logger};
 use log::error;
 
 use std::{
-    env, fs, io,
+    env,
+    fs::{self, FileType},
+    io,
     os::windows::prelude::MetadataExt,
     path::{Path, PathBuf},
     process,
@@ -26,6 +28,7 @@ struct FileData {
     idx: u32,
     name: String,
     path: String,
+    filetype: String,
     hidden: bool,
     read_only: bool,
     modified: u64,
@@ -36,14 +39,25 @@ impl FileData {
         idx: u32,
         name: String,
         path: String,
+        filetype: FileType,
         hidden: bool,
         read_only: bool,
         modified: u64,
     ) -> FileData {
+        let mut ftype = String::new();
+        match filetype.is_file() {
+            true => ftype.push_str("file"),
+            false => match filetype.is_dir() {
+                true => ftype.push_str("dir"),
+                false => ftype.push_str("symlink"),
+            },
+        }
+
         FileData {
             idx: idx,
             name: name,
             path: path,
+            filetype: ftype,
             hidden: hidden,
             read_only: read_only,
             modified: modified,
@@ -88,8 +102,8 @@ fn main() {
     let matches = sl().get_matches();
     let long_flag = matches.get_flag("long");
     let hidden_flag = matches.get_flag("hidden");
-    // let colour_flag = matches.get_flag("colour");
-    // let fullpath_flag = matches.get_flag("fullpath");
+    let colour_flag = matches.get_flag("colour");
+    let fullpath_flag = matches.get_flag("fullpath");
     if let Some(arg) = matches.get_one::<String>("path") {
         let mut path = Path::new(&arg).to_path_buf();
 
@@ -101,7 +115,7 @@ fn main() {
             path.push(current_dir);
         }
 
-        if let Err(err) = read_dir(path, long_flag, hidden_flag) {
+        if let Err(err) = read_dir(path, long_flag, hidden_flag, fullpath_flag, colour_flag) {
             error!("Error while trying to change the filenames: {}", err);
             process::exit(1);
         }
@@ -124,7 +138,8 @@ fn main() {
 
                 let path = Path::new(&current_dir).to_path_buf();
 
-                if let Err(err) = read_dir(path, long_flag, hidden_flag) {
+                if let Err(err) = read_dir(path, long_flag, hidden_flag, fullpath_flag, colour_flag)
+                {
                     error!("Error while trying to change the filenames: {}", err);
                     process::exit(1);
                 }
@@ -204,46 +219,109 @@ fn sl() -> Command {
         )
 }
 
-fn read_dir(path: PathBuf, long_flag: bool, hidden_flag: bool) -> io::Result<()> {
+fn read_dir(
+    path: PathBuf,
+    long_flag: bool,
+    hidden_flag: bool,
+    fullpath_flag: bool,
+    colour_flag: bool,
+) -> io::Result<()> {
     // TODO
     if long_flag {
         unimplemented!();
     } else if hidden_flag {
-        // TODO change this
-        // currently only for debuging
-        let dir_entries = store_dir_entries(path).unwrap();
-        for entry in dir_entries {
-            println!("{:?}", entry);
-        }
-    } else {
-        for entry in fs::read_dir(path)? {
-            let entry = entry?;
-
-            let name = entry
-                .path()
-                .file_name()
-                .unwrap_or_else(|| {
-                    error!("Unable to get the filename");
-                    process::exit(1);
-                })
-                .to_string_lossy()
-                .to_string();
-
-            if entry.path().is_file() {
-                println!("{}", name);
-            } else if entry.path().is_dir() {
-                println!("{}", name.bold());
+        if fullpath_flag {
+            if colour_flag {
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    print_output_short(entry.path, true, entry.filetype.as_str());
+                }
             } else {
-                println!("{}", name.italic().dimmed());
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    print_output_short(entry.path, false, entry.filetype.as_str());
+                }
+            }
+        } else {
+            if colour_flag {
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    print_output_short(entry.name, true, entry.filetype.as_str());
+                }
+            } else {
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    print_output_short(entry.name, false, entry.filetype.as_str());
+                }
             }
         }
+    } else {
+        if fullpath_flag {
+            if colour_flag {
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    if entry.hidden {
+                        continue;
+                    }
+                    print_output_short(entry.path, true, entry.filetype.as_str());
+                }
+            } else {
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    if entry.hidden {
+                        continue;
+                    }
+                    print_output_short(entry.path, false, entry.filetype.as_str());
+                }
+            }
+        } else {
+            if colour_flag {
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    if entry.hidden {
+                        continue;
+                    }
+                    print_output_short(entry.name, true, entry.filetype.as_str());
+                }
+            } else {
+                let dir_entries = store_dir_entries(&path).unwrap();
+                for entry in dir_entries {
+                    if entry.hidden {
+                        continue;
+                    }
+                    print_output_short(entry.name, false, entry.filetype.as_str());
+                }
+            }
+        }
+
+        // for entry in fs::read_dir(path)? {
+        //     let entry = entry?;
+
+        //     let name = entry
+        //         .path()
+        //         .file_name()
+        //         .unwrap_or_else(|| {
+        //             error!("Unable to get the filename");
+        //             process::exit(1);
+        //         })
+        //         .to_string_lossy()
+        //         .to_string();
+
+        //     if entry.path().is_file() {
+        //         println!("{}", name);
+        //     } else if entry.path().is_dir() {
+        //         println!("{}", name.bold());
+        //     } else {
+        //         println!("{}", name.italic().dimmed());
+        //     }
+        // }
     }
 
     Ok(())
 }
 
 // TODO replace unwraps
-fn store_dir_entries(entry_path: PathBuf) -> io::Result<(Vec<FileData>)> {
+fn store_dir_entries(entry_path: &PathBuf) -> io::Result<(Vec<FileData>)> {
     let mut storage: Vec<FileData> = Vec::new();
     let mut idx = 0;
     for entry in fs::read_dir(entry_path)? {
@@ -262,6 +340,7 @@ fn store_dir_entries(entry_path: PathBuf) -> io::Result<(Vec<FileData>)> {
         let hidden = is_hidden(&entry.path()).unwrap();
 
         let metadata = fs::metadata(entry.path())?;
+        let filetype = metadata.file_type();
         let read_only = metadata.permissions().readonly();
         let modified_systime = metadata.modified().unwrap();
         let diff = SystemTime::now()
@@ -271,7 +350,7 @@ fn store_dir_entries(entry_path: PathBuf) -> io::Result<(Vec<FileData>)> {
         // TODO round
         let modified = diff / 3600;
 
-        let filedata = FileData::new(idx, name, path, hidden, read_only, modified);
+        let filedata = FileData::new(idx, name, path, filetype, hidden, read_only, modified);
         storage.push(filedata);
 
         // println!(
@@ -282,6 +361,34 @@ fn store_dir_entries(entry_path: PathBuf) -> io::Result<(Vec<FileData>)> {
     }
 
     Ok(storage)
+}
+
+fn print_output_short(name_or_path: String, colour: bool, filetype: &str) {
+    if colour {
+        match filetype {
+            "file" => {
+                println!("{}", name_or_path.bright_green())
+            }
+            "dir" => {
+                println!("{}", name_or_path.bold().blue())
+            }
+            _ => {
+                println!("{}", name_or_path.italic().dimmed())
+            }
+        }
+    } else {
+        match filetype {
+            "file" => {
+                println!("{}", name_or_path)
+            }
+            "dir" => {
+                println!("{}", name_or_path.bold())
+            }
+            _ => {
+                println!("{}", name_or_path.italic().dimmed())
+            }
+        }
+    }
 }
 
 fn is_hidden(file_path: &PathBuf) -> std::io::Result<bool> {
