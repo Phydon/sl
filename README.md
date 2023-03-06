@@ -59,6 +59,9 @@ Options:
 ```
 
 ## Installation
+
+### Windows
+
 via Cargo or get the ![binary](https://github.com/Phydon/sl/releases)
 
 
