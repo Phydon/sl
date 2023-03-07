@@ -236,6 +236,7 @@ fn sl() -> Command {
         .subcommand(
             Command::new("log")
                 .short_flag('L')
+                .long_flag("log")
                 .about("Show content of the log file"),
         )
 }
