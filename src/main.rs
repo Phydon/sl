@@ -228,8 +228,6 @@ fn sl() -> Command {
         )
         .arg(
             Arg::new("path")
-                .short('p')
-                .long("path")
                 .help("Add a path to a directory")
                 .action(ArgAction::Set)
                 .num_args(1)
