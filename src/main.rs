@@ -23,7 +23,7 @@ struct FileData {
     path: String,
     filetype: String,
     hidden: bool,
-    modified: u64,
+    modified: String,
 }
 
 impl FileData {
@@ -43,12 +43,35 @@ impl FileData {
             },
         }
 
+        let mut modified_human_readable = String::new();
+        match modified {
+            0..=59 => {
+                modified_human_readable.push_str(modified.to_string().as_str());
+                modified_human_readable.push_str(" secs ago");
+            }
+            60..=3599 => {
+                let minutes = ((modified as f64 / 60.0) as f64).round();
+                modified_human_readable.push_str(minutes.to_string().as_str());
+                modified_human_readable.push_str(" min ago");
+            }
+            3600..=86399 => {
+                let hours = ((modified as f64 / 3600.0) as f64).round();
+                modified_human_readable.push_str(hours.to_string().as_str());
+                modified_human_readable.push_str(" hrs ago");
+            }
+            86400.. => {
+                let days = ((modified as f64 / 86400.0) as f64).round();
+                modified_human_readable.push_str(days.to_string().as_str());
+                modified_human_readable.push_str(" days ago");
+            }
+        }
+
         FileData {
             name: name,
             path: path,
             filetype: ftype,
             hidden: hidden,
-            modified: modified,
+            modified: modified_human_readable,
         }
     }
 }
@@ -340,7 +363,7 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
                 process::exit(1);
             })
             .as_secs();
-        let modified = diff / 3600;
+        let modified = diff;
 
         let filedata = FileData::new(name, path, filetype, hidden, modified);
         storage.push(filedata);
@@ -377,12 +400,12 @@ fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
     }
 }
 
-fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modified: u64) {
+fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modified: String) {
     if colour {
         match filetype {
             "file" => {
                 println!(
-                    "{} hrs ago\t{}\t{}",
+                    "{}\t{}\t{}",
                     modified,
                     "file",
                     name_or_path.truecolor(250, 0, 104)
@@ -390,7 +413,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
             }
             "dir" => {
                 println!(
-                    "{} hrs ago\t{}\t{}",
+                    "{}\t{}\t{}",
                     modified,
                     "dir",
                     name_or_path.bold().truecolor(112, 110, 255),
@@ -398,7 +421,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
             }
             _ => {
                 println!(
-                    "{} hrs ago\t{}\t{}",
+                    "{}\t{}\t{}",
                     modified,
                     "symlink",
                     name_or_path.italic().dimmed(),
@@ -408,14 +431,14 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
     } else {
         match filetype {
             "file" => {
-                println!("{} hrs ago\t{}\t{}", modified, "file", name_or_path)
+                println!("{}\t{}\t{}", modified, "file", name_or_path)
             }
             "dir" => {
-                println!("{} hrs ago\t{}\t{}", modified, "dir", name_or_path.bold(),)
+                println!("{}\t{}\t{}", modified, "dir", name_or_path.bold(),)
             }
             _ => {
                 println!(
-                    "{} hrs ago\t{}\t{}",
+                    "{}\t{}\t{}",
                     modified,
                     "symlink",
                     name_or_path.italic().dimmed(),
