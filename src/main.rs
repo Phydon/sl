@@ -177,6 +177,7 @@ fn sl() -> Command {
             "stuff".bright_red().reversed(),
             "✨"
         ))
+        // TODO update version
         .version("1.0.0")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
@@ -355,7 +356,7 @@ fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
                 println!("{}", name_or_path.truecolor(250, 0, 104))
             }
             "dir" => {
-                println!("{}", name_or_path.bold().truecolor(127, 111, 219))
+                println!("{}", name_or_path.bold().truecolor(112, 110, 255))
             }
             _ => {
                 println!("{}", name_or_path.italic().dimmed())
@@ -392,7 +393,7 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
                     "{} hrs ago\t{}\t{}",
                     modified,
                     "dir",
-                    name_or_path.bold().truecolor(127, 111, 219),
+                    name_or_path.bold().truecolor(112, 110, 255),
                 )
             }
             _ => {
