@@ -52,7 +52,7 @@ impl FileData {
             60..=3599 => {
                 let minutes = ((modified as f64 / 60.0) as f64).round();
                 modified_human_readable.push_str(minutes.to_string().as_str());
-                modified_human_readable.push_str(" min ago");
+                modified_human_readable.push_str(" mins ago");
             }
             3600..=86399 => {
                 let hours = ((modified as f64 / 3600.0) as f64).round();
@@ -201,7 +201,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.0.0")
+        .version("1.0.3")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
