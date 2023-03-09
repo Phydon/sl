@@ -25,37 +25,27 @@
 ![sl_cHlFf_p](https://github.com/Phydon/sl/blob/master/assets/sl_cHlFf_p.png)
 
 
-
-## Why?
-
-* I am forced to work on windows
-* -> only default shells (powershell/cmd) allowed
-* -> no external programs allowed
-* My solution => I write my own stuff as needed
-
-*I don\`t recommend using this program.
-If you can, use something like ```exa```*
-
-
 ## Usage
 
 ```
-sl [OPTIONS] [COMMAND]
+sl [OPTIONS] [PATH] [COMMAND]
 
 Commands:
-  log, -L  Show content of the log file
-  help     Print this message or the help of the given subcommand(s)
+  log, -L, --log  Show content of the log file
+  help            Print this message or the help of the given subcommand(s)
+
+Arguments:
+  [PATH]  Add a path to a directory
 
 Options:
-  -c, --colour       Show coloured output
-  -d, --dirs         Show only dirs
-  -f, --files        Show only files
-  -F, --fullpath     Show the complete path instead of just the name
-  -H, --hidden       Show hidden files
-  -l, --long         Show more output
-  -p, --path <PATH>  Add a path to a directory
-  -h, --help         Print help (see more with '--help')
-  -V, --version      Print version
+  -c, --colour    Show coloured output [aliases: color]
+  -d, --dirs      Show only dirs [aliases: dir]
+  -f, --files     Show only files [aliases: file]
+  -F, --fullpath  Show the complete path instead of just the name
+  -H, --hidden    Show hidden files [aliases: all]
+  -l, --long      Show more output
+  -h, --help      Print help (see more with '--help')
+  -V, --version   Print version
 ```
 
 ## Installation
