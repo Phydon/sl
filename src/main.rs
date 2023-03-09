@@ -202,7 +202,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.0.3")
+        .version("1.0.4")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
