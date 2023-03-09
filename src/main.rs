@@ -117,6 +117,7 @@ fn main() {
     let fullpath_flag = matches.get_flag("fullpath");
     let files_flag = matches.get_flag("files");
     let dirs_flag = matches.get_flag("dirs");
+
     if let Some(arg) = matches.get_one::<String>("path") {
         let mut path = Path::new(&arg).to_path_buf();
 
@@ -217,7 +218,8 @@ fn sl() -> Command {
                 .long("dirs")
                 .visible_alias("dir")
                 .help("Show only dirs")
-                .action(ArgAction::SetTrue),
+                .action(ArgAction::SetTrue)
+                .conflicts_with("files"),
         )
         .arg(
             Arg::new("files")
