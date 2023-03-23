@@ -80,9 +80,10 @@ fn main() {
     // handle Ctrl+C
     ctrlc::set_handler(move || {
         println!(
-            "{} {} {}",
+            "{} {} {} {}",
+            "Received Ctrl-C!".bold().red(),
             "🤬",
-            "Received Ctrl-C! => Exit program!".bold().yellow(),
+            "Exit program!".bold().red(),
             "☠",
         );
         process::exit(0)
@@ -202,7 +203,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.0.4")
+        .version("1.0.5")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
@@ -276,7 +277,7 @@ fn list_dirs(
     files_flag: bool,
     dirs_flag: bool,
 ) -> io::Result<()> {
-    let dir_entries = store_dir_entries(&path).unwrap();
+    let dir_entries = store_dir_entries(&path)?;
 
     match long_flag {
         true => {
