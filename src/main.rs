@@ -1,7 +1,6 @@
 // TODO add flags:
 // sort output differently
 // show stats
-// get size
 
 use clap::{Arg, ArgAction, Command};
 use colored::*;
@@ -10,13 +9,18 @@ use log::error;
 
 use std::{
     env,
-    fs::{self, FileType},
+    fs::{self, FileType, Permissions},
     io,
     os::windows::prelude::MetadataExt,
     path::{Path, PathBuf},
     process,
     time::SystemTime,
 };
+
+struct Perms {
+    read: String,
+    write: String,
+}
 
 struct FileData {
     name: String,
@@ -25,6 +29,7 @@ struct FileData {
     filesize: String,
     hidden: bool,
     modified: String,
+    permissions: Perms,
 }
 
 // TODO add human readable filesize
@@ -36,6 +41,7 @@ impl FileData {
         filesize: u64,
         hidden: bool,
         modified: u64,
+        permissions: Permissions,
     ) -> FileData {
         let mut ftype = String::new();
         let mut fsize = String::new();
@@ -76,6 +82,21 @@ impl FileData {
             }
         }
 
+        let mut perms = Perms {
+            read: String::new(),
+            write: String::new(),
+        };
+        match permissions.readonly() {
+            true => {
+                perms.read = String::from("r");
+                perms.write = String::from(" ");
+            }
+            false => {
+                perms.read = String::from("r");
+                perms.write = String::from("w");
+            }
+        }
+
         FileData {
             name: name,
             path: path,
@@ -83,6 +104,7 @@ impl FileData {
             filesize: fsize,
             hidden: hidden,
             modified: modified_human_readable,
+            permissions: perms,
         }
     }
 }
@@ -317,6 +339,7 @@ fn list_dirs(
                     entry.filesize.as_str(),
                     colour_flag,
                     entry.modified,
+                    entry.permissions,
                 );
             }
         }
@@ -371,6 +394,7 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
         let metadata = fs::metadata(entry.path())?;
         let filetype = metadata.file_type();
         let filesize = metadata.file_size();
+        let permissions = metadata.permissions();
         let modified_systime = metadata.modified()?;
         let diff = SystemTime::now()
             .duration_since(modified_systime)
@@ -381,7 +405,15 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
             .as_secs();
         let modified = diff;
 
-        let filedata = FileData::new(name, path, filetype, filesize, hidden, modified);
+        let filedata = FileData::new(
+            name,
+            path,
+            filetype,
+            filesize,
+            hidden,
+            modified,
+            permissions,
+        );
         storage.push(filedata);
     }
 
@@ -395,7 +427,7 @@ fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
                 println!("{}", name_or_path.truecolor(250, 0, 104))
             }
             "dir" => {
-                println!("{}", name_or_path.bold().truecolor(112, 110, 255))
+                println!("{}", name_or_path.bold())
             }
             _ => {
                 println!("{}", name_or_path.italic().dimmed())
@@ -422,33 +454,40 @@ fn print_output_long(
     filesize: &str,
     colour: bool,
     modified: String,
+    permissions: Perms,
 ) {
     if colour {
         match filetype {
             "file" => {
                 println!(
-                    "{}\t{}\t{}\t{}",
+                    "{}{}{}\t{}\t{}\t{}",
+                    ".",
+                    permissions.read,
+                    permissions.write,
                     filesize,
                     modified,
-                    "file",
                     name_or_path.truecolor(250, 0, 104)
                 )
             }
             "dir" => {
                 println!(
-                    "{}\t{}\t{}\t{}",
+                    "{}{}{}\t{}\t{}\t{}",
+                    "d",
+                    permissions.read,
+                    permissions.write,
                     filesize,
                     modified,
-                    "dir",
-                    name_or_path.bold().truecolor(112, 110, 255),
+                    name_or_path.bold(),
                 )
             }
             _ => {
                 println!(
-                    "{}\t{}\t{}\t{}",
+                    "{}{}{}\t{}\t{}\t{}",
+                    "s",
+                    permissions.read,
+                    permissions.write,
                     filesize,
                     modified,
-                    "symlink",
                     name_or_path.italic().dimmed(),
                 )
             }
@@ -456,23 +495,30 @@ fn print_output_long(
     } else {
         match filetype {
             "file" => {
-                println!("{}\t{}\t{}\t{}", filesize, modified, "file", name_or_path)
+                println!(
+                    "{}{}{}\t{}\t{}\t{}",
+                    ".", permissions.read, permissions.write, filesize, modified, name_or_path
+                )
             }
             "dir" => {
                 println!(
-                    "{}\t{}\t{}\t{}",
+                    "{}{}{}\t{}\t{}\t{}",
+                    "d",
+                    permissions.read,
+                    permissions.write,
                     filesize,
                     modified,
-                    "dir",
                     name_or_path.bold(),
                 )
             }
             _ => {
                 println!(
-                    "{}\t{}\t{}\t{}",
+                    "{}{}{}\t{}\t{}\t{}",
+                    "s",
+                    permissions.read,
+                    permissions.write,
                     filesize,
                     modified,
-                    "symlink",
                     name_or_path.italic().dimmed(),
                 )
             }
