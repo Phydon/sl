@@ -22,25 +22,35 @@ struct FileData {
     name: String,
     path: String,
     filetype: String,
+    filesize: String,
     hidden: bool,
     modified: String,
 }
 
+// TODO add human readable filesize
 impl FileData {
     fn new(
         name: String,
         path: String,
         filetype: FileType,
+        filesize: u64,
         hidden: bool,
         modified: u64,
     ) -> FileData {
         let mut ftype = String::new();
+        let mut fsize = String::new();
         match filetype.is_file() {
-            true => ftype.push_str("file"),
-            false => match filetype.is_dir() {
-                true => ftype.push_str("dir"),
-                false => ftype.push_str("symlink"),
-            },
+            true => {
+                ftype.push_str("file");
+                fsize.push_str(&filesize.to_string());
+            }
+            false => {
+                fsize.push_str("-");
+                match filetype.is_dir() {
+                    true => ftype.push_str("dir"),
+                    false => ftype.push_str("symlink"),
+                };
+            }
         }
 
         let mut modified_human_readable = String::new();
@@ -70,6 +80,7 @@ impl FileData {
             name: name,
             path: path,
             filetype: ftype,
+            filesize: fsize,
             hidden: hidden,
             modified: modified_human_readable,
         }
@@ -303,6 +314,7 @@ fn list_dirs(
                 print_output_long(
                     name_or_path,
                     entry.filetype.as_str(),
+                    entry.filesize.as_str(),
                     colour_flag,
                     entry.modified,
                 );
@@ -358,6 +370,7 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
 
         let metadata = fs::metadata(entry.path())?;
         let filetype = metadata.file_type();
+        let filesize = metadata.file_size();
         let modified_systime = metadata.modified()?;
         let diff = SystemTime::now()
             .duration_since(modified_systime)
@@ -368,7 +381,7 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
             .as_secs();
         let modified = diff;
 
-        let filedata = FileData::new(name, path, filetype, hidden, modified);
+        let filedata = FileData::new(name, path, filetype, filesize, hidden, modified);
         storage.push(filedata);
     }
 
@@ -403,12 +416,19 @@ fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
     }
 }
 
-fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modified: String) {
+fn print_output_long(
+    name_or_path: String,
+    filetype: &str,
+    filesize: &str,
+    colour: bool,
+    modified: String,
+) {
     if colour {
         match filetype {
             "file" => {
                 println!(
-                    "{}\t{}\t{}",
+                    "{}\t{}\t{}\t{}",
+                    filesize,
                     modified,
                     "file",
                     name_or_path.truecolor(250, 0, 104)
@@ -416,7 +436,8 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
             }
             "dir" => {
                 println!(
-                    "{}\t{}\t{}",
+                    "{}\t{}\t{}\t{}",
+                    filesize,
                     modified,
                     "dir",
                     name_or_path.bold().truecolor(112, 110, 255),
@@ -424,7 +445,8 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
             }
             _ => {
                 println!(
-                    "{}\t{}\t{}",
+                    "{}\t{}\t{}\t{}",
+                    filesize,
                     modified,
                     "symlink",
                     name_or_path.italic().dimmed(),
@@ -434,14 +456,21 @@ fn print_output_long(name_or_path: String, filetype: &str, colour: bool, modifie
     } else {
         match filetype {
             "file" => {
-                println!("{}\t{}\t{}", modified, "file", name_or_path)
+                println!("{}\t{}\t{}\t{}", filesize, modified, "file", name_or_path)
             }
             "dir" => {
-                println!("{}\t{}\t{}", modified, "dir", name_or_path.bold(),)
+                println!(
+                    "{}\t{}\t{}\t{}",
+                    filesize,
+                    modified,
+                    "dir",
+                    name_or_path.bold(),
+                )
             }
             _ => {
                 println!(
-                    "{}\t{}\t{}",
+                    "{}\t{}\t{}\t{}",
+                    filesize,
                     modified,
                     "symlink",
                     name_or_path.italic().dimmed(),
