@@ -17,6 +17,11 @@ use std::{
     time::SystemTime,
 };
 
+const KB: u64 = 1024;
+const MB: u64 = 1024_u64.pow(2);
+const GB: u64 = 1024_u64.pow(3);
+const TB: u64 = 1024_u64.pow(4);
+
 struct Perms {
     read: String,
     write: String,
@@ -44,18 +49,48 @@ impl FileData {
         permissions: Permissions,
     ) -> FileData {
         let mut ftype = String::new();
-        let mut fsize = String::new();
         match filetype.is_file() {
             true => {
                 ftype.push_str("file");
-                fsize.push_str(&filesize.to_string());
             }
             false => {
-                fsize.push_str("-");
                 match filetype.is_dir() {
                     true => ftype.push_str("dir"),
                     false => ftype.push_str("symlink"),
                 };
+            }
+        }
+
+        let mut fsize = String::new();
+        if filesize <= 0 {
+            fsize.push_str("-");
+        } else {
+            match filesize {
+                s if s > TB => {
+                    let size = ((filesize as f64 / TB as f64) * 10.0).round() / 10.0;
+                    fsize.push_str(&size.to_string());
+                    fsize.push_str(" Tb");
+                }
+                s if s > GB && s < TB => {
+                    let size = ((filesize as f64 / GB as f64) * 10.0).round() / 10.0;
+                    fsize.push_str(&size.to_string());
+                    fsize.push_str(" Gb");
+                }
+                s if s > MB && s < GB => {
+                    let size = ((filesize as f64 / MB as f64) * 10.0).round() / 10.0;
+                    fsize.push_str(&size.to_string());
+                    fsize.push_str(" Mb");
+                }
+                s if s > KB && s < MB => {
+                    let size = ((filesize as f64 / KB as f64) * 10.0).round() / 10.0;
+                    fsize.push_str(&size.to_string());
+                    fsize.push_str(" Kb");
+                }
+                s if s < KB => {
+                    fsize.push_str(&filesize.to_string());
+                    fsize.push_str("  B");
+                }
+                _ => fsize.push_str("-"),
             }
         }
 
@@ -73,7 +108,7 @@ impl FileData {
             3600..=86399 => {
                 let hours = ((modified as f64 / 3600.0) as f64).round();
                 modified_human_readable.push_str(hours.to_string().as_str());
-                modified_human_readable.push_str(" hrs ago");
+                modified_human_readable.push_str("  hrs ago");
             }
             86400.. => {
                 let days = ((modified as f64 / 86400.0) as f64).round();
@@ -89,7 +124,7 @@ impl FileData {
         match permissions.readonly() {
             true => {
                 perms.read = String::from("r");
-                perms.write = String::from(" ");
+                perms.write = String::from("-");
             }
             false => {
                 perms.read = String::from("r");
@@ -460,7 +495,7 @@ fn print_output_long(
         match filetype {
             "file" => {
                 println!(
-                    "{}{}{}\t{}\t{}\t{}",
+                    "{}{}{}\t{:>8}  {:>14}  {}",
                     ".",
                     permissions.read,
                     permissions.write,
@@ -471,7 +506,7 @@ fn print_output_long(
             }
             "dir" => {
                 println!(
-                    "{}{}{}\t{}\t{}\t{}",
+                    "{}{}{}\t{:>8}  {:>14}  {}",
                     "d",
                     permissions.read,
                     permissions.write,
@@ -482,7 +517,7 @@ fn print_output_long(
             }
             _ => {
                 println!(
-                    "{}{}{}\t{}\t{}\t{}",
+                    "{}{}{}\t{:>8}  {:>14}  {}",
                     "s",
                     permissions.read,
                     permissions.write,
@@ -496,13 +531,13 @@ fn print_output_long(
         match filetype {
             "file" => {
                 println!(
-                    "{}{}{}\t{}\t{}\t{}",
+                    "{}{}{}\t{:>8}  {:>14}  {}",
                     ".", permissions.read, permissions.write, filesize, modified, name_or_path
                 )
             }
             "dir" => {
                 println!(
-                    "{}{}{}\t{}\t{}\t{}",
+                    "{}{}{}\t{:>8}  {:>14}  {}",
                     "d",
                     permissions.read,
                     permissions.write,
@@ -513,7 +548,7 @@ fn print_output_long(
             }
             _ => {
                 println!(
-                    "{}{}{}\t{}\t{}\t{}",
+                    "{}{}{}\t{:>8}  {:>14}  {}",
                     "s",
                     permissions.read,
                     permissions.write,
