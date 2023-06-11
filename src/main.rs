@@ -1,7 +1,3 @@
-// TODO add flags:
-// sort output differently
-// show stats
-
 use clap::{Arg, ArgAction, Command};
 use colored::*;
 use flexi_logger::{detailed_format, Duplicate, FileSpec, Logger};
@@ -38,7 +34,6 @@ struct FileData {
     file_extension: String,
 }
 
-// TODO add human readable filesize
 impl FileData {
     fn new(
         name: String,
@@ -274,7 +269,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.0.5")
+        .version("1.1.0")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
@@ -402,7 +397,12 @@ fn list_dirs(
                     entry.name
                 };
 
-                print_output_short(name_or_path, entry.filetype.as_str(), colour_flag);
+                print_output_short(
+                    name_or_path,
+                    entry.filetype.as_str(),
+                    entry.file_extension,
+                    colour_flag,
+                );
             }
         }
     }
@@ -465,14 +465,24 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
     Ok(storage)
 }
 
-fn print_output_short(name_or_path: String, filetype: &str, colour: bool) {
+fn print_output_short(name_or_path: String, filetype: &str, file_extension: String, colour: bool) {
+    let executable = vec!["exe", "msi", "bat", "ps1"];
+
     if colour {
         match filetype {
             "file" => {
-                println!("{}", name_or_path.truecolor(250, 0, 104))
+                let mut name = String::new();
+                if executable.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(102, 255, 179));
+                    name.push_str(&cstr);
+                } else {
+                    let cstr = format!("{}", name_or_path.truecolor(191, 179, 255));
+                    name.push_str(&cstr);
+                }
+                println!("{}", name)
             }
             "dir" => {
-                println!("{}", name_or_path.bold())
+                println!("{}", name_or_path.truecolor(109, 144, 217).bold())
             }
             _ => {
                 println!("{}", name_or_path.italic().dimmed())
@@ -511,10 +521,10 @@ fn print_output_long(
             ftype.push_str(".");
             if colour {
                 if executable.iter().any(|it| &file_extension == it) {
-                    let cstr = format!("{}", name_or_path.truecolor(59, 179, 140));
+                    let cstr = format!("{}", name_or_path.truecolor(102, 255, 179));
                     name.push_str(&cstr);
                 } else {
-                    let cstr = format!("{}", name_or_path.truecolor(250, 0, 104));
+                    let cstr = format!("{}", name_or_path.truecolor(191, 179, 255));
                     name.push_str(&cstr);
                 }
             } else {
@@ -523,8 +533,13 @@ fn print_output_long(
         }
         "dir" => {
             ftype.push_str("d");
-            let cstr = format!("{}", name_or_path.bold());
-            name.push_str(&cstr);
+            if colour {
+                let cstr = format!("{}", name_or_path.truecolor(109, 144, 217).bold());
+                name.push_str(&cstr);
+            } else {
+                let cstr = format!("{}", name_or_path.bold());
+                name.push_str(&cstr);
+            }
         }
         _ => {
             ftype.push_str("s");
@@ -533,9 +548,25 @@ fn print_output_long(
         }
     }
 
+    let mut perm_read = String::new();
+    let mut perm_write = String::new();
+    if colour && permissions.write.contains("-") {
+        perm_read.push_str(&format!("{}", permissions.read.truecolor(250, 0, 104)));
+        perm_write.push_str(&format!("{}", permissions.write.truecolor(250, 0, 104)));
+    } else {
+        perm_read.push_str(&permissions.read);
+        perm_write.push_str(&permissions.write);
+    }
+
+    let fsize = if colour {
+        filesize.truecolor(59, 179, 140)
+    } else {
+        filesize.white()
+    };
+
     println!(
         "{}{}{}\t{:>8}  {:>14}  {}",
-        ftype, permissions.read, permissions.write, filesize, modified, name,
+        ftype, perm_read, perm_write, fsize, modified, name,
     );
 }
 
