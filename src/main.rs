@@ -517,6 +517,8 @@ fn print_output_long(
                     let cstr = format!("{}", name_or_path.truecolor(250, 0, 104));
                     name.push_str(&cstr);
                 }
+            } else {
+                name.push_str(&name_or_path);
             }
         }
         "dir" => {
