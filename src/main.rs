@@ -66,26 +66,25 @@ impl FileData {
                 s if s > TB => {
                     let size = ((filesize as f64 / TB as f64) * 10.0).round() / 10.0;
                     fsize.push_str(&size.to_string());
-                    fsize.push_str(" Tb");
+                    fsize.push_str("T");
                 }
                 s if s > GB && s < TB => {
                     let size = ((filesize as f64 / GB as f64) * 10.0).round() / 10.0;
                     fsize.push_str(&size.to_string());
-                    fsize.push_str(" Gb");
+                    fsize.push_str("G");
                 }
                 s if s > MB && s < GB => {
                     let size = ((filesize as f64 / MB as f64) * 10.0).round() / 10.0;
                     fsize.push_str(&size.to_string());
-                    fsize.push_str(" Mb");
+                    fsize.push_str("M");
                 }
                 s if s > KB && s < MB => {
                     let size = ((filesize as f64 / KB as f64) * 10.0).round() / 10.0;
                     fsize.push_str(&size.to_string());
-                    fsize.push_str(" Kb");
+                    fsize.push_str("K");
                 }
                 s if s < KB => {
                     fsize.push_str(&filesize.to_string());
-                    fsize.push_str("  B");
                 }
                 _ => fsize.push_str("-"),
             }
@@ -565,7 +564,7 @@ fn print_output_long(
     };
 
     println!(
-        "{}{}{}\t{:>8}  {:>14}  {}",
+        "{}{}{}\t{:>6}  {:>14}  {}",
         ftype, perm_read, perm_write, fsize, modified, name,
     );
 }
