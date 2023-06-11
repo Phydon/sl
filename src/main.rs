@@ -35,6 +35,7 @@ struct FileData {
     hidden: bool,
     modified: String,
     permissions: Perms,
+    file_extension: String,
 }
 
 // TODO add human readable filesize
@@ -47,6 +48,7 @@ impl FileData {
         hidden: bool,
         modified: u64,
         permissions: Permissions,
+        file_extension: String,
     ) -> FileData {
         let mut ftype = String::new();
         match filetype.is_file() {
@@ -140,6 +142,7 @@ impl FileData {
             hidden: hidden,
             modified: modified_human_readable,
             permissions: perms,
+            file_extension: file_extension,
         }
     }
 }
@@ -375,6 +378,7 @@ fn list_dirs(
                     colour_flag,
                     entry.modified,
                     entry.permissions,
+                    entry.file_extension,
                 );
             }
         }
@@ -426,6 +430,11 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
             process::exit(1);
         });
 
+        let mut file_extension = String::new();
+        if let Some(extension) = entry.path().extension() {
+            file_extension.push_str(&extension.to_string_lossy().to_string());
+        }
+
         let metadata = fs::metadata(entry.path())?;
         let filetype = metadata.file_type();
         let filesize = metadata.file_size();
@@ -448,6 +457,7 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
             hidden,
             modified,
             permissions,
+            file_extension,
         );
         storage.push(filedata);
     }
@@ -490,75 +500,41 @@ fn print_output_long(
     colour: bool,
     modified: String,
     permissions: Perms,
+    file_extension: String,
 ) {
-    if colour {
-        match filetype {
-            "file" => {
-                println!(
-                    "{}{}{}\t{:>8}  {:>14}  {}",
-                    ".",
-                    permissions.read,
-                    permissions.write,
-                    filesize,
-                    modified,
-                    name_or_path.truecolor(250, 0, 104)
-                )
-            }
-            "dir" => {
-                println!(
-                    "{}{}{}\t{:>8}  {:>14}  {}",
-                    "d",
-                    permissions.read,
-                    permissions.write,
-                    filesize,
-                    modified,
-                    name_or_path.bold(),
-                )
-            }
-            _ => {
-                println!(
-                    "{}{}{}\t{:>8}  {:>14}  {}",
-                    "s",
-                    permissions.read,
-                    permissions.write,
-                    filesize,
-                    modified,
-                    name_or_path.italic().dimmed(),
-                )
+    let executable = vec!["exe", "msi", "bat", "ps1"];
+
+    let mut ftype = String::new();
+    let mut name = String::new();
+    match filetype {
+        "file" => {
+            ftype.push_str(".");
+            if colour {
+                if executable.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(59, 179, 140));
+                    name.push_str(&cstr);
+                } else {
+                    let cstr = format!("{}", name_or_path.truecolor(250, 0, 104));
+                    name.push_str(&cstr);
+                }
             }
         }
-    } else {
-        match filetype {
-            "file" => {
-                println!(
-                    "{}{}{}\t{:>8}  {:>14}  {}",
-                    ".", permissions.read, permissions.write, filesize, modified, name_or_path
-                )
-            }
-            "dir" => {
-                println!(
-                    "{}{}{}\t{:>8}  {:>14}  {}",
-                    "d",
-                    permissions.read,
-                    permissions.write,
-                    filesize,
-                    modified,
-                    name_or_path.bold(),
-                )
-            }
-            _ => {
-                println!(
-                    "{}{}{}\t{:>8}  {:>14}  {}",
-                    "s",
-                    permissions.read,
-                    permissions.write,
-                    filesize,
-                    modified,
-                    name_or_path.italic().dimmed(),
-                )
-            }
+        "dir" => {
+            ftype.push_str("d");
+            let cstr = format!("{}", name_or_path.bold());
+            name.push_str(&cstr);
+        }
+        _ => {
+            ftype.push_str("s");
+            let cstr = format!("{}", name_or_path.italic().dimmed());
+            name.push_str(&cstr);
         }
     }
+
+    println!(
+        "{}{}{}\t{:>8}  {:>14}  {}",
+        ftype, permissions.read, permissions.write, filesize, modified, name,
+    );
 }
 
 fn is_hidden(file_path: &PathBuf) -> std::io::Result<bool> {
