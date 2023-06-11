@@ -564,7 +564,7 @@ fn print_output_long(
     };
 
     println!(
-        "{}{}{}\t{:>6}  {:>14}  {}",
+        "{}{}{}\t{:>7}  {:>14}  {}",
         ftype, perm_read, perm_write, fsize, modified, name,
     );
 }
