@@ -528,12 +528,7 @@ fn print_output_short(name_or_path: String, filetype: &str, file_extension: Stri
                     let cstr = format!("{}", name_or_path.bold().truecolor(226, 120, 120));
                     name.push_str(&cstr);
                 } else if SPECIAL.iter().any(|it| &file_extension == it) {
-                    let cstr = format!(
-                        "{}",
-                        name_or_path
-                            .on_truecolor(226, 164, 120)
-                            .truecolor(22, 24, 33)
-                    );
+                    let cstr = format!("{}", name_or_path.truecolor(226, 164, 120));
                     name.push_str(&cstr);
                 } else if PROGRAMMING.iter().any(|it| &file_extension == it) {
                     let cstr = format!("{}", name_or_path.truecolor(180, 190, 130));
