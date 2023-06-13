@@ -18,6 +18,8 @@ const MB: u64 = 1024_u64.pow(2);
 const GB: u64 = 1024_u64.pow(3);
 const TB: u64 = 1024_u64.pow(4);
 
+// on yellow
+const IMPORTANT: &[&'static str] = &["todo", "fixme", "readme", "important"];
 // red
 const EXECUTABLE: &[&'static str] = &["exe", "msi", "bat"];
 // yellow
@@ -48,7 +50,7 @@ const ARCHIVES: &[&'static str] = &[
     "gz", "zip", "pkg", "tar", "jar", "rar", "tgz", "z", "zst", "xz", "tgz",
 ];
 // darkgray
-const OTHER: &[&'static str] = &["~", ".git", ".gitignore", "tmp", "lock"];
+const OTHER: &[&'static str] = &["~", "git", "gitignore", "tmp", "lock"];
 
 // COLOURS
 // -------
@@ -524,7 +526,18 @@ fn print_output_short(name_or_path: String, filetype: &str, file_extension: Stri
         match filetype {
             "file" => {
                 let mut name = String::new();
-                if EXECUTABLE.iter().any(|it| &file_extension == it) {
+                if IMPORTANT
+                    .iter()
+                    .any(|it| name_or_path.to_lowercase().contains(it))
+                {
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .on_truecolor(226, 164, 120)
+                            .truecolor(30, 33, 50)
+                    );
+                    name.push_str(&cstr);
+                } else if EXECUTABLE.iter().any(|it| &file_extension == it) {
                     let cstr = format!("{}", name_or_path.bold().truecolor(226, 120, 120));
                     name.push_str(&cstr);
                 } else if SPECIAL.iter().any(|it| &file_extension == it) {
@@ -588,7 +601,18 @@ fn print_output_long(
         "file" => {
             ftype.push_str(".");
             if colour {
-                if EXECUTABLE.iter().any(|it| &file_extension == it) {
+                if IMPORTANT
+                    .iter()
+                    .any(|it| name_or_path.to_lowercase().contains(it))
+                {
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .on_truecolor(226, 164, 120)
+                            .truecolor(30, 33, 50)
+                    );
+                    name.push_str(&cstr);
+                } else if EXECUTABLE.iter().any(|it| &file_extension == it) {
                     let cstr = format!("{}", name_or_path.bold().truecolor(226, 120, 120));
                     name.push_str(&cstr);
                 } else if SPECIAL.iter().any(|it| &file_extension == it) {
