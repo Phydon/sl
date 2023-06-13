@@ -1,7 +1,7 @@
 use clap::{Arg, ArgAction, Command};
 use colored::*;
 use flexi_logger::{detailed_format, Duplicate, FileSpec, Logger};
-use log::error;
+use log::{error, info, warn};
 
 use std::{
     env,
@@ -264,7 +264,7 @@ fn main() {
         }
 
         if let Err(err) = list_dirs(
-            path,
+            path.clone(),
             long_flag,
             hidden_flag,
             fullpath_flag,
@@ -272,8 +272,22 @@ fn main() {
             files_flag,
             dirs_flag,
         ) {
-            error!("Unable to get the entries of the directory: {}", err);
-            process::exit(1);
+            match err.kind() {
+                io::ErrorKind::NotFound => {
+                    info!("\'{}\' not found: {}", path.display(), err);
+                }
+                io::ErrorKind::PermissionDenied => {
+                    warn!("Permission denied for \'{}\': {}", path.display(), err);
+                }
+                _ => {
+                    error!(
+                        "Unable to get the entries of the directory \'{}\': {}",
+                        path.display(),
+                        err
+                    );
+                    process::exit(1);
+                }
+            }
         }
     } else {
         match matches.subcommand() {
@@ -295,7 +309,7 @@ fn main() {
                 let path = Path::new(&current_dir).to_path_buf();
 
                 if let Err(err) = list_dirs(
-                    path,
+                    path.clone(),
                     long_flag,
                     hidden_flag,
                     fullpath_flag,
@@ -303,8 +317,22 @@ fn main() {
                     files_flag,
                     dirs_flag,
                 ) {
-                    error!("Unable to get the entries of the directory: {}", err);
-                    process::exit(1);
+                    match err.kind() {
+                        io::ErrorKind::NotFound => {
+                            info!("\'{}\' not found: {}", path.display(), err);
+                        }
+                        io::ErrorKind::PermissionDenied => {
+                            warn!("Permission denied for \'{}\': {}", path.display(), err);
+                        }
+                        _ => {
+                            error!(
+                                "Unable to get the entries of the directory \'{}\': {}",
+                                path.display(),
+                                err
+                            );
+                            process::exit(1);
+                        }
+                    }
                 }
             }
         }
