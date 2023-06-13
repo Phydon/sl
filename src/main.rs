@@ -234,12 +234,23 @@ fn main() {
 
     // handle arguments
     let matches = sl().get_matches();
-    let long_flag = matches.get_flag("long");
-    let hidden_flag = matches.get_flag("hidden");
-    let colour_flag = matches.get_flag("colour");
-    let fullpath_flag = matches.get_flag("fullpath");
-    let files_flag = matches.get_flag("files");
-    let dirs_flag = matches.get_flag("dirs");
+    let mut long_flag = matches.get_flag("long");
+    let mut hidden_flag = matches.get_flag("hidden");
+    let mut colour_flag = matches.get_flag("colour");
+    let mut fullpath_flag = matches.get_flag("fullpath");
+    let mut files_flag = matches.get_flag("files");
+    let mut dirs_flag = matches.get_flag("dirs");
+    let override_flag = matches.get_flag("override");
+
+    // if override flag is set -> reset everything to default values
+    if override_flag {
+        files_flag = false;
+        dirs_flag = false;
+        hidden_flag = false;
+        long_flag = false;
+        fullpath_flag = false;
+        colour_flag = false;
+    }
 
     if let Some(arg) = matches.get_one::<String>("path") {
         let mut path = Path::new(&arg).to_path_buf();
@@ -361,9 +372,9 @@ fn sl() -> Command {
         )
         .arg(
             Arg::new("hidden")
-                .short('H')
-                .long("hidden")
-                .visible_alias("all")
+                .short('a')
+                .long("all")
+                .visible_alias("hidden")
                 .help("Show hidden files")
                 .action(ArgAction::SetTrue),
         )
@@ -373,6 +384,21 @@ fn sl() -> Command {
                 .long("long")
                 .help("Show more output")
                 .long_help("Additionaly display [type, size, last modified, read_only]")
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            Arg::new("override")
+                .short('o')
+                .long("override")
+                .help("Override all previously set flags")
+                .long_help(format!(
+                    "{}\n{}\n{}",
+                    "Override all previously set flags",
+                    "This can be used when a custom alias for this command is set together with regularly used flags",
+                    "This flag allows to disable these flags and specify new ones"
+                ))
+                // TODO if new args -> add here to this list to override if needed
+                .overrides_with_all(["long", "files", "dirs", "hidden", "colour", "fullpath"])
                 .action(ArgAction::SetTrue),
         )
         .arg(
