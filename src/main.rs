@@ -18,6 +18,61 @@ const MB: u64 = 1024_u64.pow(2);
 const GB: u64 = 1024_u64.pow(3);
 const TB: u64 = 1024_u64.pow(4);
 
+// red
+const EXECUTABLE: &[&'static str] = &["exe", "msi", "bat"];
+// yellow
+const SPECIAL: &[&'static str] = &[
+    "md", "cgf", "conf", "config", "ini", "json", "tml", "toml", "yaml", "yml", "csv", "markdown",
+    "org", "rst", "xml",
+];
+// green
+const PROGRAMMING: &[&'static str] = &[
+    "py", "pl", "rs", "c", "cpp", "awk", "vb", "cabal", "clj", "cs", "csx", "css", "h", "hpp",
+    "dart", "ex", "exs", "elc", "elm", "erl", "fs", "go", "hs", "ipynb", "java", "bsh", "js", "jl",
+    "kt", "tex", "lisp", "lua", "matlab", "pas", "p", "php", "ps1", "r", "rb", "scala", "sh",
+    "bash", "zsh", "fish", "sql", "swift", "ts", "tsx", "vim", "cmake", "make",
+];
+// pink
+const MEDIA: &[&'static str] = &[
+    "bmp", "gif", "jpeg", "jpg", "png", "svg", "avi", "mp4", "wmv", "wma", "mp3", "wav", "mid",
+    "ttf",
+];
+// red
+const OFFICE: &[&'static str] = &[
+    "doc", "docx", "epub", "odt", "pdf", "ps", "xls", "xlsx", "ods", "xlr", "ppt", "pptx", "odp",
+    "pps", "ics",
+];
+// cyan
+const ARCHIVES: &[&'static str] = &[
+    "apk", "deb", "rpm", "xbps", "bag", "bin", "dmg", "img", "iso", "toast", "vcd", "7z", "arj",
+    "gz", "zip", "pkg", "tar", "jar", "rar", "tgz", "z", "zst", "xz", "tgz",
+];
+// darkgray
+const OTHER: &[&'static str] = &["~", ".git", ".gitignore", "tmp", "lock"];
+
+// COLOURS
+// -------
+// OLD
+// green (filesize) = 59, 179, 140
+// red (readonly) = 250, 0, 104
+// blue (dirs) = 109, 144, 217
+// exec = 102, 255, 179
+// normal (file) = 191, 179, 255
+
+// ICEBERG-DARK
+//   background_color: '161821'     22,24,33
+//   white: 'c6c8d1'                198,200,209
+//   red: 'e27878'                  226,120,120
+//   green: 'b4be82'                180,190,130
+//   yellow: 'e2a478'               226,164,120
+//   blue: '84a0c6'                 132,160,198
+//   pink: 'ada0d3'                 173,160,211
+//   cyan: '89b8c2'                 137,184,194
+//   black: '1e2132'                30,33,50
+//   gray: '828597'                 130,133,151
+//   darkgray: '6b7089'             107,112,137
+//   darkergray: '36384a'           54,56,74
+
 struct Perms {
     read: String,
     write: String,
@@ -465,17 +520,38 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
 }
 
 fn print_output_short(name_or_path: String, filetype: &str, file_extension: String, colour: bool) {
-    let executable = vec!["exe", "msi", "bat", "ps1"];
-
     if colour {
         match filetype {
             "file" => {
                 let mut name = String::new();
-                if executable.iter().any(|it| &file_extension == it) {
-                    let cstr = format!("{}", name_or_path.truecolor(102, 255, 179));
+                if EXECUTABLE.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.bold().truecolor(226, 120, 120));
+                    name.push_str(&cstr);
+                } else if SPECIAL.iter().any(|it| &file_extension == it) {
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .on_truecolor(226, 164, 120)
+                            .truecolor(22, 24, 33)
+                    );
+                    name.push_str(&cstr);
+                } else if PROGRAMMING.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(180, 190, 130));
+                    name.push_str(&cstr);
+                } else if OFFICE.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(226, 120, 120));
+                    name.push_str(&cstr);
+                } else if OTHER.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(107, 112, 137));
+                    name.push_str(&cstr);
+                } else if MEDIA.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(173, 160, 211));
+                    name.push_str(&cstr);
+                } else if ARCHIVES.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(137, 184, 194));
                     name.push_str(&cstr);
                 } else {
-                    let cstr = format!("{}", name_or_path.truecolor(191, 179, 255));
+                    let cstr = format!("{}", name_or_path.truecolor(198, 200, 209));
                     name.push_str(&cstr);
                 }
                 println!("{}", name)
@@ -511,19 +587,36 @@ fn print_output_long(
     permissions: Perms,
     file_extension: String,
 ) {
-    let executable = vec!["exe", "msi", "bat", "ps1"];
-
     let mut ftype = String::new();
     let mut name = String::new();
     match filetype {
         "file" => {
             ftype.push_str(".");
             if colour {
-                if executable.iter().any(|it| &file_extension == it) {
-                    let cstr = format!("{}", name_or_path.truecolor(102, 255, 179));
+                if EXECUTABLE.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.bold().truecolor(226, 120, 120));
+                    name.push_str(&cstr);
+                } else if SPECIAL.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(226, 164, 120))
+                        .on_truecolor(22, 24, 33);
+                    name.push_str(&cstr);
+                } else if PROGRAMMING.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(180, 190, 130));
+                    name.push_str(&cstr);
+                } else if OFFICE.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(226, 120, 120));
+                    name.push_str(&cstr);
+                } else if OTHER.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(107, 112, 137));
+                    name.push_str(&cstr);
+                } else if MEDIA.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(173, 160, 211));
+                    name.push_str(&cstr);
+                } else if ARCHIVES.iter().any(|it| &file_extension == it) {
+                    let cstr = format!("{}", name_or_path.truecolor(137, 184, 194));
                     name.push_str(&cstr);
                 } else {
-                    let cstr = format!("{}", name_or_path.truecolor(191, 179, 255));
+                    let cstr = format!("{}", name_or_path.truecolor(198, 200, 209));
                     name.push_str(&cstr);
                 }
             } else {
