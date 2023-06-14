@@ -18,8 +18,12 @@ const MB: u64 = 1024_u64.pow(2);
 const GB: u64 = 1024_u64.pow(3);
 const TB: u64 = 1024_u64.pow(4);
 
+// on white
+const NOTES_INFO: &[&'static str] = &["todo", "info"];
 // on yellow
-const IMPORTANT: &[&'static str] = &["todo", "fixme", "readme", "important"];
+const NOTES_IMPORTANT: &[&'static str] = &["readme", "important"];
+// on red
+const NOTES_WARN: &[&'static str] = &["fixme", "warn", "warning"];
 // red
 const EXECUTABLE: &[&'static str] = &["exe", "msi", "bat"];
 // yellow
@@ -580,7 +584,18 @@ fn print_output_short(name_or_path: String, filetype: &str, file_extension: Stri
         match filetype {
             "file" => {
                 let mut name = String::new();
-                if IMPORTANT
+                if NOTES_INFO
+                    .iter()
+                    .any(|it| name_or_path.to_lowercase().contains(it))
+                {
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .on_truecolor(198, 200, 209)
+                            .truecolor(30, 33, 50)
+                    );
+                    name.push_str(&cstr);
+                } else if NOTES_IMPORTANT
                     .iter()
                     .any(|it| name_or_path.to_lowercase().contains(it))
                 {
@@ -588,6 +603,17 @@ fn print_output_short(name_or_path: String, filetype: &str, file_extension: Stri
                         "{}",
                         name_or_path
                             .on_truecolor(226, 164, 120)
+                            .truecolor(30, 33, 50)
+                    );
+                    name.push_str(&cstr);
+                } else if NOTES_WARN
+                    .iter()
+                    .any(|it| name_or_path.to_lowercase().contains(it))
+                {
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .on_truecolor(226, 120, 120)
                             .truecolor(30, 33, 50)
                     );
                     name.push_str(&cstr);
@@ -655,7 +681,18 @@ fn print_output_long(
         "file" => {
             ftype.push_str(".");
             if colour {
-                if IMPORTANT
+                if NOTES_INFO
+                    .iter()
+                    .any(|it| name_or_path.to_lowercase().contains(it))
+                {
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .on_truecolor(198, 200, 209)
+                            .truecolor(30, 33, 50)
+                    );
+                    name.push_str(&cstr);
+                } else if NOTES_IMPORTANT
                     .iter()
                     .any(|it| name_or_path.to_lowercase().contains(it))
                 {
@@ -663,6 +700,17 @@ fn print_output_long(
                         "{}",
                         name_or_path
                             .on_truecolor(226, 164, 120)
+                            .truecolor(30, 33, 50)
+                    );
+                    name.push_str(&cstr);
+                } else if NOTES_WARN
+                    .iter()
+                    .any(|it| name_or_path.to_lowercase().contains(it))
+                {
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .on_truecolor(226, 120, 120)
                             .truecolor(30, 33, 50)
                     );
                     name.push_str(&cstr);
