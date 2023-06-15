@@ -78,6 +78,7 @@ const OTHER: &[&'static str] = &["~", "git", "gitignore", "tmp", "lock"];
 //   gray: '828597'                 130,133,151
 //   darkgray: '6b7089'             107,112,137
 //   darkergray: '36384a'           54,56,74
+//   silver: 'bcb6ba'               97,88,111
 
 struct Perms {
     read: String,
@@ -88,7 +89,7 @@ struct FileData {
     name: String,
     path: String,
     filetype: String,
-    filesize: String,
+    filesize: Vec<String>,
     hidden: bool,
     modified: String,
     permissions: Perms,
@@ -119,35 +120,38 @@ impl FileData {
             }
         }
 
-        let mut fsize = String::new();
+        let mut fsize: Vec<String> = Vec::new();
         if filesize <= 0 {
-            fsize.push_str("-");
+            fsize.push("-".to_string());
         } else {
             match filesize {
                 s if s > TB => {
                     let size = ((filesize as f64 / TB as f64) * 10.0).round() / 10.0;
-                    fsize.push_str(&size.to_string());
-                    fsize.push_str("T");
+                    fsize.push(size.to_string());
+                    fsize.push("T".to_string());
                 }
                 s if s > GB && s < TB => {
                     let size = ((filesize as f64 / GB as f64) * 10.0).round() / 10.0;
-                    fsize.push_str(&size.to_string());
-                    fsize.push_str("G");
+                    fsize.push(size.to_string());
+                    fsize.push("G".to_string());
                 }
                 s if s > MB && s < GB => {
                     let size = ((filesize as f64 / MB as f64) * 10.0).round() / 10.0;
-                    fsize.push_str(&size.to_string());
-                    fsize.push_str("M");
+                    fsize.push(size.to_string());
+                    fsize.push("M".to_string());
                 }
                 s if s > KB && s < MB => {
                     let size = ((filesize as f64 / KB as f64) * 10.0).round() / 10.0;
-                    fsize.push_str(&size.to_string());
-                    fsize.push_str("K");
+                    fsize.push(size.to_string());
+                    fsize.push("K".to_string());
                 }
                 s if s < KB => {
-                    fsize.push_str(&filesize.to_string());
+                    fsize.push(filesize.to_string());
+                    fsize.push("B".to_string());
                 }
-                _ => fsize.push_str("-"),
+                _ => {
+                    fsize.push("-".to_string());
+                }
             }
         }
 
@@ -483,7 +487,7 @@ fn list_dirs(
                 print_output_long(
                     name_or_path,
                     entry.filetype.as_str(),
-                    entry.filesize.as_str(),
+                    entry.filesize,
                     colour_flag,
                     entry.modified,
                     entry.permissions,
@@ -669,7 +673,7 @@ fn print_output_short(name_or_path: String, filetype: &str, file_extension: Stri
 fn print_output_long(
     name_or_path: String,
     filetype: &str,
-    filesize: &str,
+    mut filesize: Vec<String>,
     colour: bool,
     modified: String,
     permissions: Perms,
@@ -771,15 +775,43 @@ fn print_output_long(
         perm_write.push_str(&permissions.write);
     }
 
-    let fsize = if colour {
-        filesize.truecolor(59, 179, 140)
+    let fsize_unit = if colour {
+        if let Some(f) = filesize.pop() {
+            f.truecolor(50, 170, 130)
+        } else {
+            "".to_string().white()
+        }
     } else {
-        filesize.white()
+        if let Some(f) = filesize.pop() {
+            f.white()
+        } else {
+            "".to_string().white()
+        }
+    };
+
+    let fsize = if colour {
+        if let Some(f) = filesize.pop() {
+            f.truecolor(102, 255, 179)
+        } else {
+            "".to_string().white()
+        }
+    } else {
+        if let Some(f) = filesize.pop() {
+            f.white()
+        } else {
+            "".to_string().white()
+        }
+    };
+
+    let modified = if colour {
+        modified.truecolor(97, 88, 111)
+    } else {
+        modified.white()
     };
 
     println!(
-        "{}{}{}\t{:>7}  {:>14}  {}",
-        ftype, perm_read, perm_write, fsize, modified, name,
+        "{}{}{}\t{:>7}{}  {:>14}  {}",
+        ftype, perm_read, perm_write, fsize, fsize_unit, modified, name,
     );
 }
 
