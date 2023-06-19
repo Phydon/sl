@@ -779,13 +779,13 @@ fn print_output_long(
         if let Some(f) = filesize.pop() {
             f.truecolor(50, 170, 130)
         } else {
-            "".to_string().white()
+            "".to_string().truecolor(198, 200, 209)
         }
     } else {
         if let Some(f) = filesize.pop() {
-            f.white()
+            f.truecolor(198, 200, 209)
         } else {
-            "".to_string().white()
+            "".to_string().truecolor(198, 200, 209)
         }
     };
 
@@ -793,20 +793,20 @@ fn print_output_long(
         if let Some(f) = filesize.pop() {
             f.truecolor(102, 255, 179)
         } else {
-            "".to_string().white()
+            "".to_string().truecolor(198, 200, 209)
         }
     } else {
         if let Some(f) = filesize.pop() {
-            f.white()
+            f.truecolor(198, 200, 209)
         } else {
-            "".to_string().white()
+            "".to_string().truecolor(198, 200, 209)
         }
     };
 
     let modified = if colour {
         modified.truecolor(97, 88, 111)
     } else {
-        modified.white()
+        modified.truecolor(198, 200, 209)
     };
 
     println!(
