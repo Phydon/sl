@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 clap = "4.1.8"
-colored = "2.0.0"
+owo-colors = "3"
 flexi_logger = "0.23"
 log = "0.4"
 ctrlc = "3.2.5"

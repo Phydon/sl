@@ -1,7 +1,7 @@
 use clap::{Arg, ArgAction, Command};
-use colored::*;
 use flexi_logger::{detailed_format, Duplicate, FileSpec, Logger};
 use log::{error, info, warn};
+use owo_colors::OwoColorize;
 
 use std::{
     env,
@@ -372,7 +372,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.1.1")
+        .version("1.1.2")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
@@ -722,8 +722,12 @@ fn print_output_long(
                     let cstr = format!("{}", name_or_path.bold().truecolor(226, 120, 120));
                     name.push_str(&cstr);
                 } else if SPECIAL.iter().any(|it| &file_extension == it) {
-                    let cstr = format!("{}", name_or_path.truecolor(226, 164, 120))
-                        .on_truecolor(22, 24, 33);
+                    let cstr = format!(
+                        "{}",
+                        name_or_path
+                            .truecolor(226, 164, 120)
+                            .on_truecolor(22, 24, 33)
+                    );
                     name.push_str(&cstr);
                 } else if PROGRAMMING.iter().any(|it| &file_extension == it) {
                     let cstr = format!("{}", name_or_path.truecolor(180, 190, 130));
@@ -775,43 +779,56 @@ fn print_output_long(
         perm_write.push_str(&permissions.write);
     }
 
-    let fsize_unit = if colour {
-        if let Some(f) = filesize.pop() {
-            f.truecolor(50, 170, 130)
-        } else {
-            "".to_string().truecolor(198, 200, 209)
+    let mut fsize_unit = String::new();
+    match colour {
+        true => {
+            if let Some(f) = filesize.pop() {
+                fsize_unit.push_str(&f.truecolor(50, 170, 130).to_string())
+            } else {
+                fsize_unit.push_str(&"".truecolor(198, 200, 209).to_string())
+            }
         }
-    } else {
-        if let Some(f) = filesize.pop() {
-            f.truecolor(198, 200, 209)
-        } else {
-            "".to_string().truecolor(198, 200, 209)
-        }
-    };
-
-    let fsize = if colour {
-        if let Some(f) = filesize.pop() {
-            f.truecolor(102, 255, 179)
-        } else {
-            "".to_string().truecolor(198, 200, 209)
-        }
-    } else {
-        if let Some(f) = filesize.pop() {
-            f.truecolor(198, 200, 209)
-        } else {
-            "".to_string().truecolor(198, 200, 209)
+        false => {
+            if let Some(f) = filesize.pop() {
+                fsize_unit.push_str(&f.truecolor(198, 200, 209).to_string())
+            } else {
+                fsize_unit.push_str(&"".truecolor(198, 200, 209).to_string())
+            }
         }
     };
 
-    let modified = if colour {
-        modified.truecolor(97, 88, 111)
-    } else {
-        modified.truecolor(198, 200, 209)
+    let mut fsize = String::new();
+    match colour {
+        true => {
+            if let Some(f) = filesize.pop() {
+                fsize.push_str(&f.truecolor(102, 255, 179).to_string())
+            } else {
+                fsize.push_str(&"".truecolor(198, 200, 209).to_string())
+            }
+        }
+        false => {
+            if let Some(f) = filesize.pop() {
+                fsize.push_str(&f.truecolor(198, 200, 209).to_string())
+            } else {
+                fsize.push_str(&"".truecolor(198, 200, 209).to_string())
+            }
+        }
+    };
+
+    let modified = match colour {
+        true => modified.truecolor(97, 88, 111),
+        false => modified.truecolor(198, 200, 209),
     };
 
     println!(
-        "{}{}{}\t{:>7}{}  {:>14}  {}",
-        ftype, perm_read, perm_write, fsize, fsize_unit, modified, name,
+        "{}{}{}\t{:>30}{}  {:>35}  {}",
+        ftype,
+        perm_read,
+        perm_write,
+        fsize,
+        fsize_unit,
+        modified.to_string(),
+        name,
     );
 }
 
