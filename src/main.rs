@@ -565,6 +565,7 @@ fn store_dir_entries(entry_path: &PathBuf) -> io::Result<Vec<FileData>> {
                 process::exit(1);
             })
             .as_secs();
+        // TODO remove??
         let modified = diff;
 
         let filedata = FileData::new(
