@@ -10,21 +10,11 @@
 
 ## Examples
 
-_screenshots are currently not up to date_
-
 ![sl](https://github.com/Phydon/sl/blob/master/assets/sl.png)
-
-![sl_c](https://github.com/Phydon/sl/blob/master/assets/sl_c.png)
 
 ![sl_l](https://github.com/Phydon/sl/blob/master/assets/sl_l.png)
 
-![sl_cHlF](https://github.com/Phydon/sl/blob/master/assets/sl_cHlF.png)
-
-![sl_Hd_p](https://github.com/Phydon/sl/blob/master/assets/sl_Hd_p.png)
-
-![sl_Hf_p](https://github.com/Phydon/sl/blob/master/assets/sl_Hf_p.png)
-
-![sl_cHlFf_p](https://github.com/Phydon/sl/blob/master/assets/sl_cHlFf_p.png)
+![sl_lc](https://github.com/Phydon/sl/blob/master/assets/sl_lc.png)
 
 
 ## Usage
