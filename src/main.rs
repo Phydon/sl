@@ -19,7 +19,7 @@ const GB: u64 = 1024_u64.pow(3);
 const TB: u64 = 1024_u64.pow(4);
 
 // on white
-const NOTES_INFO: &[&'static str] = &["todo", "info"];
+const NOTES_INFO: &[&'static str] = &["todo", "info", "log"];
 // on yellow
 const NOTES_IMPORTANT: &[&'static str] = &["readme", "important"];
 // on red
@@ -372,7 +372,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.1.2")
+        .version("1.1.3")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
