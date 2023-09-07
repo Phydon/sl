@@ -29,7 +29,7 @@ const EXECUTABLE: &[&'static str] = &["exe", "msi", "bat"];
 // yellow
 const SPECIAL: &[&'static str] = &[
     "md", "cgf", "conf", "config", "ini", "json", "tml", "toml", "yaml", "yml", "csv", "markdown",
-    "org", "rst", "xml",
+    "org", "rst", "xml", "ron",
 ];
 // green
 const PROGRAMMING: &[&'static str] = &[
@@ -372,7 +372,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.1.3")
+        .version("1.1.4")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
