@@ -41,7 +41,7 @@ const PROGRAMMING: &[&'static str] = &[
 // pink
 const MEDIA: &[&'static str] = &[
     "bmp", "gif", "jpeg", "jpg", "png", "svg", "avi", "mp4", "wmv", "wma", "mp3", "wav", "mid",
-    "ttf",
+    "ttf", "m4a",
 ];
 // red
 const OFFICE: &[&'static str] = &[
@@ -372,7 +372,7 @@ fn sl() -> Command {
             "✨"
         ))
         // TODO update version
-        .version("1.1.4")
+        .version("1.1.5")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
