@@ -365,14 +365,14 @@ fn sl() -> Command {
             "{}\n{} {} {} {} {} {}",
             "Simply list directory entries",
             "💥",
-            "WITHOUT".strikethrough().yellow(),
-            "any".bold().underline().blue(),
+            "even".bold().underline().blue(),
+            "WITH".strikethrough().yellow(),
             "fancy".italic().purple(),
             "stuff".bright_red().reversed(),
             "✨"
         ))
         // TODO update version
-        .version("1.1.5")
+        .version("1.1.6")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
@@ -822,7 +822,7 @@ fn print_output_long(
     };
 
     println!(
-        "{}{}{}\t{:>30}{}  {:>35}  {}",
+        "{}{}{}\t{:>30}{}  {:>37}  {}",
         ftype,
         perm_read,
         perm_write,

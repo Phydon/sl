@@ -6,7 +6,7 @@
 
 > simply list everything in a directory
 
-> no fancy stuff => just another (bad) ```ls``` clone
+> just another (bad) ```ls``` clone
 
 ## Examples
 
