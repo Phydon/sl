@@ -125,22 +125,22 @@ impl FileData {
             fsize.push("-".to_string());
         } else {
             match filesize {
-                s if s > TB => {
+                s if s >= TB => {
                     let size = ((filesize as f64 / TB as f64) * 10.0).round() / 10.0;
                     fsize.push(size.to_string());
                     fsize.push("T".to_string());
                 }
-                s if s > GB && s < TB => {
+                s if s >= GB && s < TB => {
                     let size = ((filesize as f64 / GB as f64) * 10.0).round() / 10.0;
                     fsize.push(size.to_string());
                     fsize.push("G".to_string());
                 }
-                s if s > MB && s < GB => {
+                s if s >= MB && s < GB => {
                     let size = ((filesize as f64 / MB as f64) * 10.0).round() / 10.0;
                     fsize.push(size.to_string());
                     fsize.push("M".to_string());
                 }
-                s if s > KB && s < MB => {
+                s if s >= KB && s < MB => {
                     let size = ((filesize as f64 / KB as f64) * 10.0).round() / 10.0;
                     fsize.push(size.to_string());
                     fsize.push("K".to_string());
@@ -351,7 +351,7 @@ fn sl() -> Command {
         ))
         .about("List directory entries")
         // TODO update version
-        .version("1.1.7")
+        .version("1.1.8")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
