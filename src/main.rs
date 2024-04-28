@@ -349,24 +349,9 @@ fn sl() -> Command {
             "SIMPLE LS".bold().truecolor(250, 0, 104),
             "Leann Phydon <leann.phydon@gmail.com>".italic().dimmed()
         ))
-        .about("Simply list directory entries without any fancy stuff")
-        .before_long_help(format!(
-            "{}\n{}",
-            "SIMPLE LS".bold().truecolor(250, 0, 104),
-            "Leann Phydon <leann.phydon@gmail.com>".italic().dimmed()
-        ))
-        .long_about(format!(
-            "{}\n{} {} {} {} {} {}",
-            "Simply list directory entries",
-            "💥",
-            "even".bold().underline().blue(),
-            "WITH".strikethrough().yellow(),
-            "fancy".italic().purple(),
-            "stuff".bright_red().reversed(),
-            "✨"
-        ))
+        .about("List directory entries")
         // TODO update version
-        .version("1.1.6")
+        .version("1.1.7")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
@@ -381,7 +366,7 @@ fn sl() -> Command {
                 .short('d')
                 .long("dirs")
                 .visible_alias("dir")
-                .help("Show only dirs")
+                .help("Show only directories")
                 .action(ArgAction::SetTrue)
                 .conflicts_with("files"),
         )
@@ -397,7 +382,7 @@ fn sl() -> Command {
             Arg::new("fullpath")
                 .short('F')
                 .long("fullpath")
-                .help("Show the complete path instead of just the name")
+                .help("Show the complete path instead of just the filename")
                 .action(ArgAction::SetTrue),
         )
         .arg(
@@ -412,7 +397,7 @@ fn sl() -> Command {
             Arg::new("long")
                 .short('l')
                 .long("long")
-                .help("Show more output")
+                .help("Show more detailed entry information")
                 .long_help("Additionaly display [type, size, last modified, read_only]")
                 .action(ArgAction::SetTrue),
         )
