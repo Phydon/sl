@@ -209,13 +209,7 @@ impl FileData {
 fn main() {
     // handle Ctrl+C
     ctrlc::set_handler(move || {
-        println!(
-            "{} {} {} {}",
-            "Received Ctrl-C!".bold().red(),
-            "🤬",
-            "Exit program!".bold().red(),
-            "☠",
-        );
+        println!("{}", "Received Ctrl-C!".italic());
         process::exit(0)
     })
     .expect("Error setting Ctrl-C handler");
