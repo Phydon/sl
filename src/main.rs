@@ -351,7 +351,7 @@ fn sl() -> Command {
         ))
         .about("List directory entries")
         // TODO update version
-        .version("1.1.8")
+        .version("1.1.9")
         .author("Leann Phydon <leann.phydon@gmail.com>")
         .arg(
             Arg::new("colour")
@@ -440,6 +440,19 @@ fn list_dirs(
     files_flag: bool,
     dirs_flag: bool,
 ) -> io::Result<()> {
+    if path.is_file() {
+        // return earlier
+        // TODO respect flags
+        println!("{}", path.display());
+        return Ok(());
+    } else if path.is_symlink() {
+        println!(
+            "{}",
+            path.read_link().expect("Unable to read symlink").display()
+        );
+        return Ok(());
+    }
+
     let dir_entries = store_dir_entries(&path)?;
 
     match long_flag {
