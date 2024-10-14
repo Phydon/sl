@@ -1,3 +1,4 @@
+// TODO cleanup - refactor - extract stuff into separate functions
 use clap::{Arg, ArgAction, Command};
 use flexi_logger::{detailed_format, Duplicate, FileSpec, Logger};
 use log::{error, info, warn};
